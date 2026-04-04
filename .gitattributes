@@ -1,0 +1,2 @@
+# 모든 HTML 파일을 ABAP 언어로 강제 지정
+*.html linguist-language=ABAP
