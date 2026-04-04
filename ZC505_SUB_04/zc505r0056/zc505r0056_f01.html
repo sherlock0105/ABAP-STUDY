@@ -1,0 +1,634 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0056_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0056_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0052_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZC505R0052_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form init_param</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM init_param .
+
+  pa_kokrs = '0001'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form check_param</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM check_param .
+
+  DATA : lv_korks TYPE zc505t0043-kokrs.
+
+  IF pa_kokrs IS INITIAL.
+    MESSAGE s000 WITH 'input data' DISPLAY LIKE 'E'.
+    STOP.
+  ENDIF.
+
+  SELECT SINGLE kokrs
+    INTO lv_korks
+    FROM tka01
+    WHERE kokrs EQ pa_kokrs.
+
+  IF sy-subrc NE 0.
+    MESSAGE s000 WITH 'Invalid value' DISPLAY LIKE 'E'.
+    STOP.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  _clear gs_data gt_data.
+  REFRESH gt_data_del.
+
+  SELECT a~kokrs a~kostl a~bukrs a~kosar a~verak
+         a~wrbtr a~waers a~bkzer
+         a~erdat a~erzet a~ernam
+         a~aedat a~aezet a~aenam
+         b~ltext
+    INTO CORRESPONDING FIELDS OF TABLE gt_data
+    FROM zc505t0043 AS a
+    LEFT OUTER JOIN cskt AS b
+     ON  a~kokrs EQ b~kokrs
+     AND a~kostl EQ b~kostl
+     AND b~spras EQ sy-langu
+   WHERE a~kokrs EQ pa_kokrs
+   ORDER BY a~kokrs.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout-zebra      = 'X'.
+  gs_layout-cwidth_opt = 'A'.
+  gs_layout-sel_mode   = 'D'.
+  gs_layout-stylefname = 'STYLE'.
+
+  gs_stable-row = 'X'.
+  gs_stable-col = 'X'.
+
+  PERFORM make_fcat USING :
+     'X' 'KOKRS' ' ' 'ZC505T0043' ' ' ' ',
+     'X' 'KOSTL' ' ' 'ZC505T0043' ' ' 'X',
+     ' ' 'LTEXT' ' ' 'CSKT'       ' ' ' ',
+     ' ' 'BUKRS' ' ' 'ZC505T0043' ' ' 'X',
+     ' ' 'KOSAR' ' ' 'ZC505T0043' ' ' 'X',
+     ' ' 'VERAK' ' ' 'ZC505T0043' ' ' 'X',
+     ' ' 'WRBTR' ' ' 'ZC505T0043' ' ' 'X',
+     ' ' 'WAERS' ' ' 'ZC505T0043' ' ' 'X',
+     ' ' 'BKZER' ' ' 'ZC505T0043' ' ' 'X'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat  USING  pv_key
+                       pv_field
+                       pv_text
+                       pv_ref_table
+                       pv_ref_field
+                       pv_edit.
+
+  gs_fcat-key       = pv_key.
+  gs_fcat-fieldname = pv_field.
+  gs_fcat-coltext   = pv_text.
+  gs_fcat-ref_table = pv_ref_table.
+  gs_fcat-ref_field = pv_ref_field.
+  gs_fcat-edit      = pv_edit.
+
+  CASE pv_field.
+    WHEN 'WRBTR'.
+      gs_fcat-cfieldname = 'WAERS'.
+    WHEN 'BKZER'.
+      gs_fcat-checkbox = 'X'.
+  ENDCASE.
+
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR  gs_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      side      = gcl_container-&gt;dock_at_left     " Side to Which Control is Docked
+      extension = 5000.                           " Control Extension
+
+  CREATE OBJECT gcl_grid
+    EXPORTING
+      i_parent = gcl_container.                  " Parent Container
+
+  gs_variant-report = sy-repid.
+
+  IF gcl_handler IS NOT BOUND.
+
+    CREATE OBJECT gcl_handler.
+
+  ENDIF.
+
+  SET HANDLER : gcl_handler-&gt;handle_toolbar FOR gcl_grid,
+                gcl_handler-&gt;handle_user_command FOR gcl_grid,
+                gcl_handler-&gt;handle_data_changed FOR gcl_grid.
+
+  CALL METHOD gcl_grid-&gt;register_edit_event
+    EXPORTING
+      i_event_id = gcl_grid-&gt;mc_evt_modified.                 " Event ID
+
+  CALL METHOD gcl_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant           = gs_variant               " Layout
+      i_save               = 'A'                      " Save Layout
+      i_default            = 'X'                      " Default Display Variant
+      is_layout            = gs_layout                " Layout
+      it_toolbar_excluding = gt_exclude               " Excluded Toolbar Standard Functions
+    CHANGING
+      it_outtab            = gt_data                  " Output Table
+      it_fieldcatalog      = gt_fcat.                 " Field Catalog
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_grid .
+
+  CALL METHOD gcl_grid-&gt;refresh_table_display
+    EXPORTING
+      is_stable      = gs_stable               " With Stable Rows/Columns
+      i_soft_refresh = space.                " Without Sort, Filter, etc.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form create_row</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM create_row .
+
+  CLEAR gs_data.
+
+  gs_data-kokrs = pa_kokrs.
+  gs_data-mark  = 'X'.
+
+  APPEND gs_data TO gt_data.
+  CLEAR  gs_data.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form delete_row</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM delete_row .
+
+  _clear gs_row gt_row.
+
+  CALL METHOD gcl_grid-&gt;get_selected_rows
+    IMPORTING
+      et_index_rows = gt_row.            " Indexes of Selected Rows
+
+  IF gt_row IS INITIAL.
+    MESSAGE s000 WITH 'First, select rows' DISPLAY LIKE 'E'.
+    EXIT.
+  ENDIF.
+
+  SORT gt_row BY index DESCENDING.
+
+  LOOP AT gt_row INTO gs_row.
+
+    READ TABLE gt_data INTO gs_data INDEX gs_row-index.
+
+    IF sy-subrc EQ 0.
+
+      APPEND gs_data TO  gt_data_del.
+      CLEAR gs_data.
+
+      DELETE gt_data INDEX gs_row-index.
+
+    ENDIF.
+
+  ENDLOOP.
+
+  PERFORM refresh_grid.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form exclude_toolbar</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM exclude_toolbar .
+
+  APPEND cl_gui_alv_grid=&gt;mc_fc_check          TO gt_exclude.
+  APPEND cl_gui_alv_grid=&gt;mc_fc_loc_cut        TO gt_exclude.
+  APPEND cl_gui_alv_grid=&gt;mc_fc_loc_copy       TO gt_exclude.
+  APPEND cl_gui_alv_grid=&gt;mc_fc_refresh        TO gt_exclude.
+  APPEND cl_gui_alv_grid=&gt;mc_mb_paste          TO gt_exclude.
+  APPEND cl_gui_alv_grid=&gt;mc_fc_loc_undo       TO gt_exclude.
+  APPEND cl_gui_alv_grid=&gt;mc_fc_loc_insert_row TO gt_exclude.
+  APPEND cl_gui_alv_grid=&gt;mc_fc_loc_delete_row TO gt_exclude.
+  APPEND cl_gui_alv_grid=&gt;mc_fc_loc_copy_row   TO gt_exclude.
+  APPEND cl_gui_alv_grid=&gt;mc_fc_loc_append_row TO gt_exclude.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_style</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_style .
+
+  DATA : lv_tablx TYPE sy-tabix,
+         ls_style TYPE lvc_s_styl.
+
+  LOOP AT gt_data INTO gs_data.
+
+    lv_tablx = sy-tabix.
+
+    REFRESH gs_data-style.
+
+    ls_style-fieldname = 'KOKRS'.
+    ls_style-style     = cl_gui_alv_grid=&gt;mc_style_disabled.
+
+    APPEND ls_style TO gs_data-style.
+    CLEAR  ls_style.
+
+    ls_style-fieldname = 'KOSTL'.
+    ls_style-style     = cl_gui_alv_grid=&gt;mc_style_disabled.
+
+    APPEND ls_style TO gs_data-style.
+    CLEAR  ls_style.
+
+    MODIFY gt_data FROM gs_data INDEX lv_tablx
+    TRANSPORTING style.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form save_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM save_data .
+
+  DATA : ls_save   TYPE zc505t0043,
+         lt_save   LIKE TABLE OF ls_save,
+         lt_del    LIKE TABLE OF ls_save,
+         lv_commit.
+
+  _clear ls_save lt_save.
+  CLEAR lv_commit.
+
+  CALL METHOD : gcl_grid-&gt;check_changed_data.
+
+  IF gt_data_del IS NOT INITIAL.
+    MOVE-CORRESPONDING gt_data_del TO lt_del.
+
+    DELETE zc505t0043 FROM TABLE lt_del.
+
+    IF sy-dbcnt &gt; 0.
+      lv_commit = 'X'.
+    ENDIF.
+  ENDIF.
+
+  LOOP AT gt_data INTO gs_data WHERE mark EQ 'X'.
+
+    MOVE-CORRESPONDING gs_data TO ls_save.
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    IF gs_data-kostl IS INITIAL.</font>
+<font color ="#0000FF">*      CONTINUE.</font>
+<font color ="#0000FF">*    ENDIF.</font>
+
+    CHECK gs_data-kostl IS NOT INITIAL.
+
+    IF ls_save-erdat IS INITIAL.
+
+      ls_save-erdat = sy-datum.
+      ls_save-erzet = sy-uzeit.
+      ls_save-ernam = sy-uname.
+
+    ELSE.
+
+      ls_save-aedat = sy-datum.
+      ls_save-aezet = sy-uzeit.
+      ls_save-aenam = sy-uname.
+
+    ENDIF.
+
+    APPEND ls_save TO lt_save.
+    CLEAR ls_save.
+
+  ENDLOOP.
+
+  IF lt_save IS NOT INITIAL.
+    MODIFY zc505t0043 FROM TABLE lt_save.
+
+    IF sy-dbcnt &gt; 0.
+      lv_commit = 'X'.
+    ENDIF.
+
+  ENDIF.
+
+  IF lv_commit IS NOT INITIAL.
+
+    COMMIT WORK AND WAIT.
+
+    REFRESH gt_data_del.
+
+    PERFORM clear_mark.
+    MESSAGE s002.
+
+  ELSE.
+
+    MESSAGE s000 WITH 'Data was not changed' DISPLAY LIKE 'E'.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form clear_mark</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM clear_mark .
+
+  DATA : lv_tabix TYPE sy-tabix.
+
+  LOOP AT gt_data INTO gs_data WHERE mark = 'X'.
+
+    CLEAR gs_data-mark.
+
+    lv_tabix = sy-tabix.
+
+    MODIFY gt_data FROM gs_data INDEX lv_tabix
+    TRANSPORTING mark.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_data_changed</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; ER_DATA_CHANGED_&gt;MT_MOD_CELLS</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_data_changed  USING  pcl_changed TYPE REF TO cl_alv_changed_data_protocol.
+
+  DATA : ls_modi  TYPE lvc_s_modi,
+         lv_ltext TYPE cskt-ltext.
+
+  LOOP AT pcl_changed-&gt;mt_mod_cells INTO ls_modi.
+
+    READ TABLE gt_data INTO gs_data INDEX ls_modi-row_id.
+
+    IF sy-subrc NE 0.
+      CONTINUE.
+    ENDIF.
+
+    gs_data-mark = 'X'.
+
+    CASE ls_modi-fieldname.
+      WHEN 'KOSTL'.
+
+        SELECT SINGLE ltext
+         INTO lv_ltext
+         FROM cskt
+        WHERE spras EQ sy-langu
+          AND kokrs EQ pa_kokrs
+          AND kostl EQ ls_modi-value.
+
+        CALL METHOD pcl_changed-&gt;modify_cell
+          EXPORTING
+            i_row_id    = ls_modi-row_id    " Row ID
+            i_fieldname = 'LTEXT'           " Field Name
+            i_value     = lv_ltext.         " Value
+
+    ENDCASE.
+
+    MODIFY gt_data FROM gs_data INDEX ls_modi-row_id
+    TRANSPORTING mark.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form toggle_display</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM toggle_display .
+
+  DATA : lv_mode TYPE i.
+
+  CASE gcl_grid-&gt;is_ready_for_input( ).
+    WHEN '0'.
+      lv_mode = 1.
+    WHEN '1'.
+      lv_mode = 0.
+  ENDCASE.
+
+  CALL METHOD gcl_grid-&gt;set_ready_for_input
+    EXPORTING
+      i_ready_for_input = lv_mode.                " Ready for Input Status
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_changed_finished</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_MODIFIED</font>
+<font color ="#0000FF">*&      --&gt; ET_GOOD_CELLS</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_changed_finished  USING    pv_modified
+                                       pt_good_cells TYPE lvc_t_modi.
+
+  DATA : ls_modi TYPE lvc_s_modi.
+
+  CHECK pv_modified IS NOT INITIAL.
+
+  LOOP AT pt_good_cells INTO ls_modi.
+
+    READ TABLE gt_data INTO gs_data INDEX ls_modi-row_id.
+
+    IF sy-subrc NE 0.
+      CONTINUE.
+    ENDIF.
+
+    gs_data-mark = 'X'.
+
+    CASE ls_modi-fieldname.
+      WHEN 'KOSTL'.
+
+        SELECT SINGLE ltext
+          INTO gs_data-ltext
+          FROM cskt
+          WHERE spras EQ sy-langu
+          AND kokrs EQ pa_kokrs
+          AND kostl EQ gs_data-kostl.
+
+    ENDCASE.
+
+    MODIFY gt_data FROM gs_data INDEX ls_modi-row_id
+    TRANSPORTING mark ltext.
+
+  ENDLOOP.
+
+  PERFORM refresh_grid.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_toolbar</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_OBJECT_&gt;MT_TOOLBAR</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_toolbar  USING   pt_toolbar TYPE ttb_button. "header 가 없음
+
+  DATA : ls_toolber TYPE stb_button.
+
+  ls_toolber-butn_type = 3.
+
+  APPEND ls_toolber TO pt_toolbar.
+  CLEAR  ls_toolber.
+
+  ls_toolber-function  = 'CREATE'.
+  ls_toolber-butn_type = 0.
+  ls_toolber-icon      = icon_insert_row.
+  ls_toolber-text      = 'Create'.
+  ls_toolber-quickinfo = 'Create'.
+
+  APPEND ls_toolber TO pt_toolbar.
+  CLEAR  ls_toolber.
+
+  ls_toolber-function  = 'DELETE'.
+  ls_toolber-butn_type = 0.
+  ls_toolber-icon      = icon_delete_row.
+  ls_toolber-text      = 'Delete'.
+  ls_toolber-quickinfo = 'Delete'.
+
+  APPEND ls_toolber TO pt_toolbar.
+  CLEAR  ls_toolber.
+
+  ls_toolber-butn_type = 3.
+
+  APPEND ls_toolber TO pt_toolbar.
+  CLEAR  ls_toolber.
+
+  ls_toolber-function  = 'TOGGLE'.
+  ls_toolber-butn_type = 0.
+  ls_toolber-icon      = icon_toggle_display_change.
+  ls_toolber-text      = 'Toggle'.
+  ls_toolber-quickinfo = 'Toggle'.
+
+  APPEND ls_toolber TO pt_toolbar.
+  CLEAR  ls_toolber.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_user_command</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_UCOMM</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_user_command  USING  pv_ucomm TYPE sy-ucomm. "char 은 안해도 된다.
+
+  CASE pv_ucomm.
+
+    WHEN 'CREATE'.               "행 추가 버튼
+      PERFORM create_row.        "신규 행 추가(내부테이블)
+      PERFORM refresh_grid.      "ALV 즉시 반영
+
+    WHEN 'DELETE'.               "삭제 버튼
+      PERFORM delete_row.        "선택 행 삭제 처리
+
+    WHEN 'TOGGLE'.
+      PERFORM toggle_display.
+  ENDCASE.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

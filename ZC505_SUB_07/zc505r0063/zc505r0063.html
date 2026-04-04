@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0063</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0063</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [C5] Submit practice</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R0063</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r0063 MESSAGE-ID zc505m.
+
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-t01.
+
+  PARAMETERS : pa_bukrs TYPE bkpf-bukrs,
+               pa_gjahr TYPE bkpf-gjahr.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+DATA : BEGIN OF ls_data,
+         belnr TYPE bseg-belnr,
+         buzei TYPE bseg-buzei,
+         blart TYPE bkpf-blart,
+         ltext TYPE t003t-ltext,
+         budat TYPE bkpf-budat,
+         bschl TYPE bseg-bschl,
+         koart TYPE bseg-koart,
+         gsber TYPE bseg-gsber,
+         gtext TYPE tgsbt-gtext, "desc
+         hkont TYPE bseg-hkont,
+         shkzg TYPE bseg-shkzg,
+         dmbtr TYPE bseg-dmbtr,
+         pswsl TYPE bseg-pswsl,
+         style TYPE lvc_t_styl,
+         mark,
+       END OF ls_data,
+
+       lt_data LIKE TABLE OF ls_data.
+
+EXPORT iv_sub = 'X' TO MEMORY ID 'PDH'.
+
+SUBMIT zc505r0057
+  WITH : pa_bukrs EQ pa_bukrs,
+         pa_gjahr EQ pa_gjahr
+AND RETURN.
+
+
+<font color ="#0000FF">*SUBMIT zc505r0057</font>
+<font color ="#0000FF">*  WITH pa_bukrs EQ pa_bukrs</font>
+<font color ="#0000FF">*  WITH pa_gjahr EQ pa_gjahr</font>
+<font color ="#0000FF">*   AND RETURN.</font>
+
+REFRESH lt_data.
+
+IMPORT et_data = lt_data FROM MEMORY ID 'PDH'.
+
+FREE MEMORY ID 'PDH'.
+
+CHECK sy-subrc EQ 0.
+
+cl_demo_output=&gt;display( lt_data ).
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T01 Selection Condition</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_BUKRS D       .</font>
+<font color ="#0000FF">* PA_GJAHR D       .</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

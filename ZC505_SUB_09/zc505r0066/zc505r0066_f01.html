@@ -1,0 +1,269 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0066_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0066_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0066_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZC505R0066_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  REFRESH gt_flight.
+
+  SELECT *
+        INTO TABLE @gt_flight
+  FROM zc505cds0008( p_carrid = @pa_car,
+                     p_connid = @pa_con,
+                     p_fldate = @pa_fld
+                    ).
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data2 .
+
+  REFRESH gt_sbook.
+
+  SELECT carrid, connid, fldate, bookid, customid,
+         custtype, custtype_desc, luggweight, wunit,
+         class, forcuram, forcurkey
+    INTO TABLE @gt_sbook
+    UP TO 50 ROWS "data 가 많아서 up t0 설정
+    FROM zc505cds0009( p_carrid = @pa_car,
+                       p_connid = @pa_con,
+                       p_fldate = @pa_fld
+                      ).
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module ACTIVE_TAB OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE active_tab OUTPUT.
+
+  CASE gv_pressed.
+    WHEN 'FIRST'.
+      gv_screen = '0101'.
+
+    WHEN 'SECOND'.
+      gv_screen = '0102'.
+
+  ENDCASE.
+
+  gc_tab-activetab = gv_pressed.
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      Module  EXIT_0100  INPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*       text</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+MODULE exit_0100 INPUT.
+
+  IF gcl_container_f IS BOUND.
+
+    CALL METHOD : gcl_grid_f-&gt;free, gcl_container_f-&gt;free.
+    FREE : gcl_grid_f, gcl_container_f.
+
+  ENDIF.
+
+  IF gcl_container_b IS BOUND.
+
+    CALL METHOD : gcl_grid_b-&gt;free, gcl_container_b-&gt;free.
+    FREE : gcl_grid_b, gcl_container_b.
+
+  ENDIF.
+
+  LEAVE TO SCREEN 0.
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout_f</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout_f .
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'ZC505CDS0008'                  " Structure name (structure, table, view)
+    CHANGING
+      ct_fieldcat      = gt_fcat_f.                  " Field Catalog with Field Descriptions
+
+  DELETE gt_fcat_f INDEX 1.
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  LOOP AT gt_fcat_f ASSIGNING FIELD-SYMBOL(&lt;fs_fcat&gt;).</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    CASE &lt;fs_fcat&gt;-fieldname.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*      WHEN 'CARRID' OR 'CONNID' OR 'FLDATE'.</font>
+<font color ="#0000FF">*        &lt;fs_fcat&gt;-key = 'X'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    ENDCASE.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  ENDLOOP.</font>
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen_f</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen_f .
+
+  CREATE OBJECT gcl_container_f
+    EXPORTING
+      container_name = 'GCL_CONTAINER_F'.
+
+  CREATE OBJECT gcl_grid_f
+    EXPORTING
+      i_parent = gcl_container_f.
+
+  gs_variant-report  = sy-repid.
+  gs_variant-handle = 'A1'.
+
+  CALL METHOD gcl_grid_f-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant                 " Layout
+      i_save          = 'A'                 " Save Layout
+      i_default       = 'X'              " Default Display Variant
+      is_layout       = gs_layout                " Layout
+    CHANGING
+      it_outtab       = gt_flight               " Output Table
+      it_fieldcatalog = gt_fcat_f.                 " Field Catalog
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_param</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_param .
+
+  pa_car = 'AA'.
+  pa_con = '0017'.
+  pa_fld = '20250731'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat_b</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat_b  USING  pv_key
+                         pv_field
+                         pv_text
+                         pv_ref_table
+                         pv_ref_field.
+
+  gs_fcat = VALUE #(
+                    key       = pv_key
+                    fieldname = pv_field
+                    coltext   = pv_text
+                    ref_table = pv_ref_table
+                    ref_field = pv_ref_field
+                    ).
+
+
+  CASE pv_field.
+    WHEN 'LUGGWEIGHT'.
+      gs_fcat-qfieldname = 'WUNIT'.
+    WHEN 'FORCURAM'.
+      gs_fcat-cfieldname = 'FORCURKEY'.
+  ENDCASE.
+
+
+  APPEND gs_fcat TO gt_fcat_b.
+  CLEAR  gs_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen_b</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen_b .
+
+
+  CREATE OBJECT gcl_container_b
+    EXPORTING
+      container_name = 'GCL_CONTAINER_B'.
+
+  CREATE OBJECT gcl_grid_b
+    EXPORTING
+      i_parent = gcl_container_b.
+
+  gs_variant-report  = sy-repid.
+  gs_variant-handle = 'B1'.
+
+  CALL METHOD gcl_grid_b-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant
+      i_save          = 'A'
+      i_default       = 'X'
+      is_layout       = gs_layout
+    CHANGING
+      it_outtab       = gt_sbook
+      it_fieldcatalog = gt_fcat_b.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_color</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_color .
+
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

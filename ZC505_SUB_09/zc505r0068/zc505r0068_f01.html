@@ -1,0 +1,438 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0068_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0068_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0068_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  RANGES : lr_carrid FOR scarr-carrid,
+           lr_connid FOR sflight-connid,
+           lr_fldate FOR sflight-fldate.
+
+  REFRESH : lr_carrid, lr_connid, lr_fldate, gt_data.
+
+  IF pa_car IS NOT INITIAL.
+
+    lr_carrid[] = VALUE #(
+                  (
+                  sign   = 'I'
+                  option = 'EQ'
+                  low    = pa_car
+                  )
+                        ).
+
+  ENDIF.
+
+  IF pa_con IS NOT INITIAL.
+
+    lr_connid[] = VALUE #(
+                    (
+                  sign   = 'I'
+                  option = 'EQ'
+                  low    = pa_con
+                    )
+                        ).
+
+  ENDIF.
+
+  IF pa_fld IS NOT INITIAL.
+
+    lr_fldate-sign   = 'I'.
+    lr_fldate-option = 'EQ'.
+    lr_fldate-low    = pa_fld.
+
+    APPEND lr_fldate.
+  ENDIF.
+
+  SELECT status, carrid, connid, fldate, carrname,
+         cityfrom, cityto, price, currcode
+    INTO CORRESPONDING FIELDS OF TABLE @gt_data
+    FROM zc505cds0014
+<font color ="#0000FF">*      UP TO 300 ROWS</font>
+   WHERE carrid IN @lr_carrid
+     AND connid IN @lr_connid
+     AND fldate IN @lr_fldate
+   ORDER BY carrid, connid, fldate.
+
+  IF sy-subrc NE 0.
+    MESSAGE s001.
+    LEAVE LIST-PROCESSING.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout = VALUE #(
+              zebra      = 'X'
+              cwidth_opt = 'A'
+              sel_mode   = 'B'
+              grid_title = TEXT-t02
+              smalltitle = 'X'
+                   ).
+
+  gs_stable = VALUE #(
+                row = 'X'
+                col = 'X'
+                     ).
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'ZC505CDSV0014'
+    CHANGING
+      ct_fieldcat      = gt_fcat.
+
+  LOOP AT gt_fcat ASSIGNING FIELD-SYMBOL(&lt;fs_fcat&gt;).
+
+    CASE &lt;fs_fcat&gt;-fieldname.
+
+      WHEN 'STATUS'.
+        &lt;fs_fcat&gt;-key = 'X'.
+        &lt;fs_fcat&gt;-col_pos = 1.
+        &lt;fs_fcat&gt;-coltext = 'Status'.
+        &lt;fs_fcat&gt;-icon    = 'X'.
+
+      WHEN 'CARRID'.
+        &lt;fs_fcat&gt;-hotspot = 'X'.
+
+    ENDCASE.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      side      = gcl_container-&gt;dock_at_left " Side to Which Control is Docked
+      extension = 5000.                       " Control Extension
+
+  CREATE OBJECT gcl_grid
+    EXPORTING
+      i_parent = gcl_container.
+
+  gs_variant-report = sy-repid.
+
+  SET HANDLER : lcl_event_handler=&gt;handle_hotspot       FOR gcl_grid,
+                lcl_event_handler=&gt;handle_double_click  FOR gcl_grid.
+
+  CALL METHOD gcl_grid-&gt;register_edit_event
+    EXPORTING
+      i_event_id = gcl_grid-&gt;mc_evt_modified.                 " Event ID
+
+  CALL METHOD gcl_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant       " Layout
+      i_save          = 'A'              " Save Layout
+      i_default       = 'X'              " Default Display Variant
+      is_layout       = gs_layout        " Layout
+    CHANGING
+      it_outtab       = gt_data           " Output Table
+      it_fieldcatalog = gt_fcat.         " Field Catalog
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_hotspot</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW_ID</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN_ID</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_hotspot  USING    ps_row TYPE lvc_s_row
+                              ps_col TYPE lvc_s_col.
+
+  CHECK ps_row-rowtype IS INITIAL.
+
+  READ TABLE gt_data INTO DATA(gs_data) INDEX ps_row-index.
+
+  CHECK sy-subrc EQ 0.
+
+  PERFORM get_sbook_data USING gs_data-carrid
+                               gs_data-connid
+                               gs_data-fldate.
+
+  IF gt_sbook IS INITIAL.
+    MESSAGE s000 WITH 'Data not found'.
+    EXIT.
+  ENDIF.
+
+  CALL SCREEN '0101' STARTING AT 20 3.
+
+
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_double_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_double_click  USING     ps_row TYPE lvc_s_row
+                                    ps_col TYPE lvc_s_col.
+
+  CHECK ps_row-rowtype IS INITIAL.
+
+  READ TABLE gt_data INTO DATA(gs_data) INDEX ps_row-index.
+
+  CHECK sy-subrc EQ 0.
+
+  CASE ps_col-fieldname.
+    WHEN 'FLDATE'.
+      PERFORM get_sflight USING gs_data-carrid
+                                gs_data-connid
+                                gs_data-fldate.
+
+      CALL SCREEN '0102' STARTING AT 20 3.
+
+    WHEN OTHERS.
+      EXIT.
+
+  ENDCASE.
+
+  IF gt_sflight IS INITIAL.
+    MESSAGE s000 WITH 'Data not found'.
+    EXIT.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout_pop</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout_pop .
+
+  gs_layout = VALUE #( BASE gs_layout
+            grid_title = 'SBOOK INFO'
+            smalltitle = 'X'
+            no_toolbar = 'X'
+                 ).
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'SBOOK'
+    CHANGING
+      ct_fieldcat      = gt_fcat_sbook.
+
+  LOOP AT gt_fcat_sbook ASSIGNING FIELD-SYMBOL(&lt;fs_fcat&gt;).
+
+    CASE &lt;fs_fcat&gt;-fieldname.
+
+      WHEN 'CARRID' OR 'CONNID' OR 'FLDATE' OR 'BOOKID'.
+        &lt;fs_fcat&gt;-key = 'X'.
+
+      WHEN 'LUGGWEIGHT' OR 'WUNIT' OR 'FORCURAM' OR 'FORCURKEY'.
+
+      WHEN 'INVOICE'.
+        &lt;fs_fcat&gt;-checkbox = 'X'.
+
+      WHEN OTHERS.
+        &lt;fs_fcat&gt;-no_out = 'X'.
+
+    ENDCASE.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout_pop2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout_pop2 .
+
+  gs_layout = VALUE #( BASE gs_layout
+            grid_title = 'SFLIGHT INFO'
+            smalltitle = 'X'
+            no_toolbar = 'X'
+                 ).
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'SFLIGHT'
+    CHANGING
+      ct_fieldcat      = gt_fcat_sflight.
+
+  LOOP AT gt_fcat_sflight ASSIGNING FIELD-SYMBOL(&lt;fs_fcat&gt;).
+
+    CASE &lt;fs_fcat&gt;-fieldname.
+
+      WHEN 'CARRID' OR 'CONNID' OR 'FLDATE' OR
+           'PRICE' OR 'WUNIT' OR 'CURRENCY' OR 'PLANETYPE'.
+
+      WHEN OTHERS.
+        &lt;fs_fcat&gt;-no_out = 'X'.
+
+    ENDCASE.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_sflight</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_sflight  USING    pv_carrid TYPE scarr-carrid
+                           pv_connid TYPE sflight-connid
+                           pv_fldate TYPE sflight-fldate..
+
+<font color ="#0000FF">* ADBC 관련</font>
+  DATA : lcl_conn    TYPE REF TO cl_sql_connection,
+         lcl_sql     TYPE REF TO cl_sql_statement,
+         lcl_result  TYPE REF TO cl_sql_result_set,
+         lr_data     TYPE REF TO data,
+         lx_sql_exec TYPE REF TO cx_root,
+         lv_sql      TYPE string,
+         lv_msg      TYPE string.
+
+  CLEAR   : gs_sflight.
+  REFRESH : gt_sflight.
+
+  TRY.
+
+      lcl_conn = cl_sql_connection=&gt;get_connection( ).
+
+      CREATE OBJECT lcl_sql
+        EXPORTING
+          con_ref = lcl_conn.
+
+      lv_sql = | SELECT CARRID, CONNID, FLDATE,   | &&
+               | PRICE, CURRENCY, PLANETYPE       | &&
+               |   FROM SFLIGHT                   | &&
+               |  WHERE MANDT  = '{ sy-mandt }'   | &&
+               |    AND CARRID = '{ pv_carrid }'  | &&
+               |    AND CONNID = '{ pv_connid }'  | &&
+               |    AND FLDATE = '{ pv_fldate }'  | .
+
+      lcl_result = lcl_sql-&gt;execute_query( lv_sql ).
+
+      GET REFERENCE OF gs_sflight INTO lr_data.
+
+<font color ="#0000FF">* Structure 형태로 받으려고 set_param_struct 메소드 호출함</font>
+      lcl_result-&gt;set_param_struct( lr_data ).
+
+      lcl_result-&gt;next( ). "Structure 형태로 하나 받으므로 next 메소드 호출
+      lcl_result-&gt;close( ).
+
+    CATCH cx_sql_exception INTO lx_sql_exec. "에러 발생시 처리하는곳
+
+      lv_msg = lx_sql_exec-&gt;get_text( ). "에러 메시지 받는다
+
+      MESSAGE s000 WITH lv_msg DISPLAY LIKE 'E'.
+      EXIT.
+
+  ENDTRY.
+
+  APPEND gs_sflight TO gt_sflight.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_sbook_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; GS_DATA_CARRID</font>
+<font color ="#0000FF">*&      --&gt; GS_DATA_CONNID</font>
+<font color ="#0000FF">*&      --&gt; GS_DATA_FLDATE</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_sbook_data  USING    pv_carrid TYPE scarr-carrid
+                              pv_connid TYPE sflight-connid
+                              pv_fldate TYPE sflight-fldate.
+  REFRESH gt_sbook.
+
+  DATA : lcl_statement TYPE REF TO cl_sql_statement,
+         lr_data       TYPE REF TO data,
+         lv_sql        TYPE string,
+         lx_sql_exept  TYPE REF TO cx_root,
+         lv_msg        TYPE string.
+
+  TRY.
+      DATA(lcl_connection) = cl_sql_connection=&gt;get_connection( ). "DEFAULT CONNECTION 얻기
+
+<font color ="#0000FF">*SQL 을 실행할 객체에 CONNECTION 전달</font>
+      CREATE OBJECT lcl_statement
+        EXPORTING
+          con_ref = lcl_connection.
+
+<font color ="#0000FF">*실행할 SQL 구문 작성</font>
+      lv_sql = | SELECT CARRID, CONNID, FLDATE, BOOKID, LUGGWEIGHT, WUNIT, INVOICE, FORCURAM, FORCURKEY | &&
+               |   FROM SBOOK                                   | &&
+               |  WHERE MANDT  = '{ sy-mandt }'                 | &&
+               |    AND CARRID = '{ pv_carrid }'                | &&
+               |    AND CONNID = '{ pv_connid }'                | &&
+               |    AND FLDATE = '{ pv_fldate }'                | .
+
+<font color ="#0000FF">*SQL 을 실행하고 결과 받기</font>
+      DATA(lcl_result) = lcl_statement-&gt;execute_query( lv_sql ).
+
+<font color ="#0000FF">*결과를 받기 위해서 Any Data 와 itab 을 동기화 시킴 ( Call bt reference )</font>
+      GET REFERENCE OF gt_sbook INTO lr_data.
+
+      lcl_result-&gt;set_param_table( lr_data ).
+      lcl_result-&gt;next_package(  ).
+      lcl_result-&gt;close( ).
+
+    CATCH cx_sql_exception INTO lx_sql_exept.
+
+      lv_msg = lx_sql_exept-&gt;get_text( ).
+      lcl_result-&gt;close( ).
+
+      MESSAGE s000 WITH lv_msg DISPLAY LIKE 'E'.
+      EXIT.
+
+  ENDTRY.
+
+<font color ="#0000FF">*이후 gt_data 가지고 loop 활용</font>
+
+  READ TABLE gt_sbook INTO gs_sbook INDEX 1.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

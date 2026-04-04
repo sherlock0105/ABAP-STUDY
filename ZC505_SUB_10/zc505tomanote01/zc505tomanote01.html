@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505TOMANOTE01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505TOMANOTE01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [C5] TEST</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505TOMANOTE01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505tomanote01.
+
+SELECT carrid, connid, price, 'CLASS 5' AS class,
+  ( price * -1 ) AS price_negative,
+  div( 30, 2 ) AS mok,   "몫
+  mod( 10, 3 ) AS remain, "나머지
+  abs( -1000 ) AS abs
+  FROM sflight
+  INTO TABLE @DATA(gt_data).
+
+
+<font color ="#0000FF">*  아래의 모든 New Open SQL 은 CDS View 에서도 사용 가능 : 변수 사용만 빼고</font>
+
+DATA : lv_name(10) VALUE 'SYNC5'.
+
+SELECT carrid, carrname, @sy-datum AS today, @lv_name AS name, 'Class 5' AS class,
+       CASE carrid
+         WHEN 'AA' THEN '아메리카 에어'
+         WHEN 'KA' THEN '대한항공'
+         WHEN 'LH' THEN url
+         WHEN 'UA' THEN
+                        CASE currcode
+                          WHEN 'USD' THEN '달러'
+                          WHEN 'EUR' THEN '유로'
+                          ELSE currcode
+                        END
+         ELSE '기타항공'
+       END AS carrname_kr
+  INTO TABLE @DATA(lt_scarr)
+  FROM scarr.
+
+<font color ="#0000FF">*FLOOR : 버림, CEIL : 올림</font>
+<font color ="#0000FF">*CAST  : 형변환 : DEC 와 INT2, INT4 만 가능</font>
+<font color ="#0000FF">*CDS View 에서는 CAST 시 데이터엘리먼트 와 빌트인 타입 모두 가능</font>
+<font color ="#0000FF">*CDS View 에서 빌트인 타입 사용 예</font>
+<font color ="#0000FF">*--&gt; CAST( carrname AS abap.char(10) )</font>
+<font color ="#0000FF">*--&gt; CAST( 'AAAA' AS matnr )</font>
+<font color ="#0000FF">*--&gt; CAST( price AS abap.int4 )</font>
+<font color ="#0000FF">*CONCAT_WITH_SPACE( 필드(또는 값), 필드(또는 값), 공백개수 )</font>
+SELECT carrid, connid, fldate, price, ( price * 2 ) + 2 AS price_2,
+       div( 52, 2 ) AS mok, mod( 9, 2 ) AS remain, abs( price - 1000 ) AS abs,
+       floor( price ) AS floor_price, ceil( price ) AS ceil_price,
+       CAST( price AS DEC( 10, 2 ) ) AS cast_price_dec,
+       CAST( price AS INT4 ) AS cast_price_int,
+       concat( carrid, fldate ) AS concat_data,
+       concat_with_space( carrid, connid, 2 ) AS with_space
+  FROM sflight
+  INTO TABLE @DATA(lt_sflight).
+
+BREAK-POINT.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

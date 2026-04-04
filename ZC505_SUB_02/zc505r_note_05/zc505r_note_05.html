@@ -1,0 +1,237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_05</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_05</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  11월 27일</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_05</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_05.
+
+<font color ="#0000FF">**실습1********************************************************************</font>
+
+DATA: ls_flight TYPE zc505t0028,
+      lt_flight LIKE TABLE OF ls_flight.
+
+DATA : lv_name(10),
+       lv_name2(10),
+       lv_name3(10).
+
+
+ls_flight-carrid     = 'AIR'.
+ls_flight-connid     = '1'.
+ls_flight-fldate     = '20251111'.
+ls_flight-bookid     = '2348'.
+ls_flight-price      = 50000.
+ls_flight-currcode   = 'USD'.
+ls_flight-airpfrom   = 'ACA'.
+ls_flight-airpto     = 'ASP'.
+ls_flight-customid   = '1'.
+ls_flight-luggweight = 15.
+ls_flight-wunit      = 'BC'.
+
+APPEND ls_flight TO lt_flight.
+CLEAR ls_flight.
+
+ls_flight-carrid     = 'KOR'.
+ls_flight-connid     = '2'.
+ls_flight-fldate     = '20251131'.
+ls_flight-bookid     = '2348'.
+ls_flight-price      = 50000.
+ls_flight-currcode   = 'USD'.
+ls_flight-airpfrom   = 'ACA'.
+ls_flight-airpto     = 'ASP'.
+ls_flight-customid   = '1'.
+ls_flight-luggweight = 10.
+ls_flight-wunit      = 'BC'.
+
+APPEND ls_flight TO lt_flight.
+CLEAR ls_flight.
+
+ls_flight-carrid     = 'ABR'.
+ls_flight-connid     = '3'.
+ls_flight-fldate     = '20251111'.
+ls_flight-bookid     = '2348'.
+ls_flight-price      = 50000.
+ls_flight-currcode   = 'USD'.
+ls_flight-airpfrom   = 'ACA'.
+ls_flight-airpto     = 'ASP'.
+ls_flight-customid   = '1'.
+ls_flight-luggweight = 60.
+ls_flight-wunit      = 'BC'.
+
+APPEND ls_flight TO lt_flight.
+CLEAR ls_flight.
+
+ls_flight-carrid     = 'CCC'.
+ls_flight-connid     = '4'.
+ls_flight-fldate     = '20251111'.
+ls_flight-bookid     = '2348'.
+ls_flight-price      = 50000.
+ls_flight-currcode   = 'USD'.
+ls_flight-airpfrom   = 'ACA'.
+ls_flight-airpto     = 'ASP'.
+ls_flight-customid   = '1'.
+ls_flight-luggweight = 50.
+ls_flight-wunit      = 'BC'.
+
+APPEND ls_flight TO lt_flight.
+CLEAR ls_flight.
+
+ls_flight-carrid     = 'NBC'.
+ls_flight-connid     = '5'.
+ls_flight-fldate     = '20251111'.
+ls_flight-bookid     = '2348'.
+ls_flight-price      = 50000.
+ls_flight-currcode   = 'USD'.
+ls_flight-airpfrom   = 'ACA'.
+ls_flight-airpto     = 'ASP'.
+ls_flight-customid   = '1'.
+ls_flight-luggweight = 100.
+ls_flight-wunit      = 'BC'.
+
+APPEND ls_flight TO lt_flight.
+CLEAR ls_flight.
+
+READ TABLE lt_flight INTO ls_flight INDEX 1.
+IF sy-subrc EQ 0.
+  WRITE : ls_flight-carrid.
+ENDIF.
+
+READ TABLE lt_flight INTO ls_flight INDEX 2.
+IF sy-subrc EQ 0.
+  WRITE : ls_flight-carrid.
+ENDIF.
+
+READ TABLE lt_flight INTO ls_flight INDEX 4.
+IF sy-subrc EQ 0.
+  WRITE : ls_flight-carrid.
+ENDIF.
+
+
+lv_name = 'AB'.
+
+CASE lv_name.
+  WHEN 'AB' OR 'ABB'.
+    WRITE : /,'AB 매칭'.
+
+  WHEN 'BA'.
+    WRITE : /,'BA 매칭'.
+
+  WHEN 'ABAP'.
+    WRITE : /,'ABAP 매칭'.
+
+ENDCASE.
+
+<font color ="#0000FF">*AB 매칭이 나온다.</font>
+
+
+lv_name2 = 'BA'.
+lv_name3 = 'ABAP'.
+
+CASE 'ABAP'.
+  WHEN lv_name.
+    WRITE :/, 'lv_name 매칭'.
+  WHEN lv_name2.
+    WRITE :/, 'lv_name2 매칭'.
+  WHEN lv_name3.
+    WRITE :/, 'lv_name3 매칭'.
+ENDCASE.
+
+<font color ="#0000FF">*lv_name3 매칭이 나온다.</font>
+
+DATA : lv_cnt TYPE i.
+
+CLEAR lv_cnt.
+
+DO 5 TIMES.
+
+  lv_cnt = lv_cnt + 1.
+  WRITE : /, lv_cnt.
+
+ENDDO.
+
+LOOP AT lt_flight INTO ls_flight.
+
+  WRITE : /, sy-tabix.
+
+ENDLOOP.
+
+DO 5 TIMES.
+  WRITE : /, SY-INDEX.
+
+ENDDO.
+
+
+<font color ="#0000FF">*구구단 만들기</font>
+
+DATA : lv_dan    TYPE i,
+       lv_result TYPE i.
+
+
+DO 8 TIMES.
+
+  lv_dan = sy-index + 1.
+
+
+  DO 9 TIMES.
+
+    lv_result = lv_dan * sy-index.
+    WRITE : lv_dan, 'X', sy-index, '=', lv_result.
+  ENDDO.
+
+  WRITE : /.
+ENDDO.
+
+<font color ="#0000FF">* 별찍기</font>
+
+
+DO 5 TIMES.
+  WRITE /.
+  DO sy-index TIMES.
+
+    WRITE : '*'.
+
+  ENDDO.
+  WRITE /.
+
+ENDDO.
+
+
+DO 5 TIMES.
+  WRITE /.
+  DO 5 - sy-index + 1 TIMES.
+      WRITE : '*'.
+  ENDDO.
+
+ENDDO.
+
+<font color ="#0000FF">* 나혼자 연습</font>
+
+<font color ="#0000FF">*LOOP AT lt_flight INTO ls_flight.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  IF ls_flight-luggweight &gt; 20.</font>
+<font color ="#0000FF">*    WRITE: /,ls_flight-carrid, ls_flight-luggweight,'무게 초과입니다.'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  ELSE .</font>
+<font color ="#0000FF">*    WRITE :/,ls_flight-carrid, ls_flight-luggweight,'적정 무게입니다.'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  ENDIF.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*ENDLOOP.</font>
+
+<font color ="#0000FF">*cl_demo_output=&gt;display( lt_flight ).</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

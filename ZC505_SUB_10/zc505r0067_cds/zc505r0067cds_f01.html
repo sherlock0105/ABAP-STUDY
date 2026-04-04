@@ -1,0 +1,294 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0067CDS_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0067CDS_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0067_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZC505R0067_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_ekko</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_ekko .
+
+  REFRESH gt_ekko.
+
+  SELECT *
+    INTO TABLE @gt_ekko
+    FROM zc505cds0010
+   WHERE ebeln IN @so_ebe.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_aufk</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_aufk .
+
+  REFRESH gt_aufk.
+
+  DATA : lr_aufnr TYPE RANGE OF aufk-aufnr.
+
+  IF pa_auf IS NOT INITIAL.
+
+    lr_aufnr = VALUE #( BASE lr_aufnr
+
+                      ( low    = pa_auf
+                        sign   = 'I'
+                        option = 'EQ' )
+
+                       ).
+
+  ENDIF.
+
+  SELECT *
+    INTO TABLE @gt_aufk
+    FROM zc505cds0011
+   WHERE aufnr IN @lr_aufnr.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form radio_btn</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM radio_btn .
+
+  CASE 'X'.
+
+    WHEN pa_rb1.
+      PERFORM get_ekko.
+
+    WHEN pa_rb2.
+      PERFORM get_aufk.
+
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout = VALUE #(
+                      zebra      = 'X'
+                      cwidth_opt = 'A'
+                      sel_mode   = 'D'
+                      smalltitle = 'X'
+                      ).
+
+  gs_stable = VALUE #(
+                      row = 'X'
+                      col = 'X'
+                      ).
+
+  CASE 'X'.
+
+    WHEN pa_rb1.
+      gs_layout = VALUE #( BASE gs_layout
+                            grid_title = 'Purchasing Docs'
+                         ).
+
+      ASSIGN gt_ekko TO &lt;gft_itab&gt;.
+      gs_variant-handle = 'PUR'.
+
+
+      CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+        EXPORTING
+          i_structure_name = 'ZC505CDSV0010'                  " Structure name (structure, table, view)
+        CHANGING
+          ct_fieldcat      = gt_fcat.                  " Field Catalog with Field Descriptions
+
+
+    WHEN pa_rb2.
+      gs_layout = VALUE #( BASE gs_layout
+                            grid_title = 'Order Data'
+                          ).
+
+      ASSIGN gt_aufk TO &lt;gft_itab&gt;.
+      gs_variant-handle = 'PUR'.
+
+      CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+        EXPORTING
+          i_structure_name = 'ZC505CDSV0011'                  " Structure name (structure, table, view)
+        CHANGING
+          ct_fieldcat      = gt_fcat.                  " Field Catalog with Field Descriptions
+
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      side      = gcl_container-&gt;dock_at_left " Side to Which Control is Docked
+      extension = 5000.                       " Control Extension
+
+  CREATE OBJECT gcl_grid
+    EXPORTING
+      i_parent = gcl_container.
+
+  gs_variant-report = sy-repid.
+
+  CALL METHOD gcl_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant       " Layout
+      i_save          = 'A'              " Save Layout
+      i_default       = 'X'              " Default Display Variant
+      is_layout       = gs_layout        " Layout
+    CHANGING
+      it_outtab       = &lt;gft_itab&gt;          " Output Table
+      it_fieldcatalog = gt_fcat.         " Field Catalog
+
+  UNASSIGN &lt;gft_itab&gt;.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat .
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'ZC505CDSV0010'                  " Structure name (structure, table, view)
+    CHANGING
+      ct_fieldcat      = gt_fcat.                  " Field Catalog with Field Descriptions
+
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'ZC505CDSV0011'                  " Structure name (structure, table, view)
+    CHANGING
+      ct_fieldcat      = gt_fcat.                  " Field Catalog with Field Descriptions
+
+
+<font color ="#0000FF">*  DELETE gt_fcat INDEX 1.</font>
+
+<font color ="#0000FF">*  LOOP AT gt_fcat ASSIGNING FIELD-SYMBOL(&lt;fs_fcat&gt;).</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    CASE &lt;fs_fcat&gt;-fieldname.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**      WHEN 'EBELN' OR 'EBELP'.</font>
+<font color ="#0000FF">**        &lt;fs_fcat&gt;-key = 'X'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    ENDCASE.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  ENDLOOP.</font>
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form control_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM control_screen .
+
+  LOOP AT SCREEN.
+
+    IF pa_rb1 = 'X'.
+
+      IF screen-group1 = 'RB2'.
+        screen-active = 0.
+      ENDIF.
+
+    ENDIF.
+
+    IF pa_rb2 = 'X'.
+
+      IF screen-group1 = 'RB1'.
+        screen-active = 0.
+      ENDIF.
+
+    ENDIF.
+
+    MODIFY SCREEN.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_title</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_title .
+
+  CASE sy-tcode.
+    WHEN 'ZC505R0067'.
+      sy-title = '[C5] Purchase Order'.
+    WHEN 'ZC505R0067_2'.
+      sy-title = '[C5] Product Order'.
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_btn</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_btn .
+
+  CALL FUNCTION 'ICON_CREATE'
+    EXPORTING
+      name   = icon_xls                 " Icon name  (Name from INCLUDE &lt;ICON&gt; )
+      text   = 'Download'            " Icon text (shown behind)
+      info   = 'Template Down'           " Tooltip (if SPACE, standard tooltip)
+    IMPORTING
+      result = sscrfields-functxt_01.                 " Icon (enter the screen field here)
+<font color ="#0000FF">*    EXCEPTIONS</font>
+<font color ="#0000FF">*      icon_not_found        = 1</font>
+<font color ="#0000FF">*      outputfield_too_short = 2</font>
+<font color ="#0000FF">*      OTHERS                = 3.</font>
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

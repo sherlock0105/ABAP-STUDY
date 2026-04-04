@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505RLECT04_TOP</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505RLECT04_TOP</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505RLECT04_TOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include ZC505RLECT04_TOP                         - Report ZC505RLECT04</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505rlect04 MESSAGE-ID zc505m.
+
+TABLES : bkpf.
+
+DATA : BEGIN OF gs_data,
+         bukrs     TYPE bkpf-bukrs, " A   .
+         gjahr     TYPE bkpf-gjahr,
+         belnr     TYPE bkpf-belnr,
+         buzei     TYPE bseg-buzei, " B  .
+         blart     TYPE bkpf-blart,
+         blart_txt TYPE t003t-ltext, " 텍테 .  as .
+         budat     TYPE bkpf-budat,
+         bschl     TYPE bseg-bschl,
+         bschl_txt TYPE tbslt-ltext, " 텍테 as .
+         koart     TYPE bseg-koart,
+         shkzg     TYPE bseg-shkzg,
+         dmbtr     TYPE bseg-dmbtr,
+         pswsl     TYPE bseg-pswsl,
+       END OF gs_data,
+       gt_data LIKE TABLE OF gs_data.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_25</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_25</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  12월 9일</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_25</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_25 MESSAGE-ID zc505m.
+
+TABLES : mara, marc.
+
+DATA : BEGIN OF gt_data OCCURS 0,
+         matnr   TYPE mara-matnr,
+         maktx   TYPE makt-maktx, "desc
+         werks   TYPE marc-werks,
+         lgort   TYPE mard-lgort,
+         mtart   TYPE mara-mtart,
+         mtbez   TYPE t134t-mtbez, "desc
+         matkl   TYPE mara-matkl,
+         wgbez60 TYPE t023t-wgbez60, "desc
+         pstat   TYPE mara-pstat,
+         ekgrp   TYPE marc-ekgrp,
+         eknam   TYPE t024-eknam, "desc 근데 텍스트 테이블 없음. key 값.
+         labst   TYPE mard-labst,
+         meins   TYPE mara-meins,
+         dispo   TYPE marc-dispo,
+       END OF gt_data,
+
+       BEGIN OF gt_ekgrp OCCURS 0,
+         ekgrp TYPE t024-ekgrp,
+         eknam TYPE t024-eknam,
+       END OF gt_ekgrp,
+
+       gv_tabix TYPE sy-tabix.
+
+CLEAR   : gt_data, gt_ekgrp, gv_tabix.
+REFRESH : gt_data, gt_ekgrp.
+
+SELECTION-SCREEN BEGIN OF BLOCK bl2 WITH FRAME TITLE TEXT-t01.
+
+  SELECT-OPTIONS : so_matnr FOR mara-matnr NO INTERVALS,
+                   so_mtart FOR mara-mtart NO-EXTENSION,
+                   so_werks FOR marc-werks NO-EXTENSION NO INTERVALS.
+
+SELECTION-SCREEN END OF BLOCK bl2.
+
+SELECT a~matnr a~mtart a~pstat a~meins "mara  .
+       b~werks b~ekgrp b~dispo   " marc .
+       c~lgort c~labst "mard  .
+       d~maktx "makt
+       e~mtbez "t134t
+       f~wgbez60 "t023t
+  INTO CORRESPONDING FIELDS OF TABLE gt_data
+  FROM mara AS a
+ INNER JOIN marc AS b
+    ON a~matnr EQ b~matnr
+  LEFT OUTER JOIN mard AS c "mard 에 데이터가 하나 밖에 없어서 모든 값을 보이게 하러면 left outer 조인으로 걸어야함 .
+    ON b~matnr EQ c~matnr
+   AND b~werks EQ c~werks
+  LEFT OUTER JOIN makt AS d
+    ON a~matnr EQ d~matnr
+   AND d~spras EQ sy-langu
+  LEFT OUTER JOIN t134t AS e
+    ON a~mtart EQ e~mtart
+   AND e~spras EQ sy-langu
+  LEFT OUTER JOIN t023t AS f
+    ON a~matkl EQ f~matkl
+   AND f~spras EQ sy-langu
+ WHERE a~matnr IN so_matnr
+   AND a~matnr IN so_mtart
+   AND b~werks IN so_werks.
+
+IF sy-subrc NE 0.
+  MESSAGE s001 DISPLAY LIKE 'E'.
+  STOP.
+ENDIF.
+
+SELECT ekgrp eknam
+  INTO CORRESPONDING FIELDS OF TABLE gt_ekgrp
+  FROM t024.
+
+SORT gt_ekgrp BY ekgrp.
+
+LOOP AT gt_data.
+
+  gv_tabix = sy-tabix.
+
+  READ TABLE gt_ekgrp WITH KEY ekgrp = gt_data-ekgrp BINARY SEARCH.
+
+  IF sy-subrc EQ 0.
+<font color ="#0000FF">*    gt_data-eknam = gt_ekgrp-eknam.</font>
+
+    MOVE-CORRESPONDING gt_ekgrp to gt_data. "eknam 필드를 옮김 .
+
+    MODIFY gt_data INDEX gv_tabix TRANSPORTING eknam.
+
+  ENDIF.
+
+ENDLOOP.
+
+cl_demo_output=&gt;display( gt_data[] ).
+
+<font color ="#0000FF">**********************************************************************</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

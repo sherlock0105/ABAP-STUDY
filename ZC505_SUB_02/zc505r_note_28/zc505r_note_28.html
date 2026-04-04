@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_28</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_28</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  12월 10일</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_28</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_28 MESSAGE-ID zc505m.
+
+TABLES : mara.
+
+DATA : BEGIN OF gt_data OCCURS 0,
+         matnr TYPE mara-matnr,
+         mtart TYPE mara-mtart,
+         matkl TYPE mara-matkl,
+         werks TYPE marc-werks,
+         dispo TYPE marc-dispo,
+         ekgrp TYPE marc-ekgrp,
+       END OF gt_data,
+
+       BEGIN OF gt_data2 OCCURS 0,
+         matnr TYPE mara-matnr,
+         maktx TYPE makt-maktx, " 텍테
+         matkl TYPE mara-matkl,
+         wgbez TYPE t023t-wgbez, " 텍테
+         dispo TYPE marc-dispo,
+         dsnam TYPE t024d-dsnam, " 텍스트
+         ekgrp TYPE marc-ekgrp,
+         eknam TYPE t024-eknam, "텍스트
+       END OF gt_data2.
+
+DATA: gs_makt  TYPE makt,
+      gt_makt  LIKE TABLE OF gs_makt,
+
+      gs_t023t TYPE t023t,
+      gt_t023t LIKE TABLE OF gs_t023t,
+
+      gs_t024d TYPE t024d,
+      gt_t024d LIKE TABLE OF gs_t024d,
+
+      gs_t024  TYPE t024,
+      gt_t024  LIKE TABLE OF gs_t024.
+
+CLEAR   : gt_data, gt_data2, gs_makt, gs_t023t, gs_t024d, gs_t024.
+REFRESH : gt_data, gt_data2, gt_makt, gt_t023t, gt_t024d, gt_t024.
+
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-t01.
+
+  SELECT-OPTIONS : so_mat FOR mara-matnr.
+  PARAMETERS : pa_wer TYPE marc-werks OBLIGATORY DEFAULT '0001'.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+SELECT a~matnr a~mtart a~matkl
+       b~werks b~dispo b~ekgrp
+  INTO CORRESPONDING FIELDS OF TABLE gt_data
+  FROM mara AS a
+ INNER JOIN marc AS b
+    ON  a~matnr EQ b~matnr
+ WHERE a~matnr IN so_mat
+   AND b~werks EQ pa_wer.
+
+IF sy-subrc NE 0.
+  MESSAGE s001.
+  STOP.
+ENDIF.
+
+SELECT matnr maktx
+  INTO CORRESPONDING FIELDS OF TABLE gt_makt
+  FROM makt
+ WHERE spras = sy-langu.
+
+SELECT matkl wgbez
+  INTO CORRESPONDING FIELDS OF TABLE gt_t023t
+  FROM t023t
+ WHERE spras = sy-langu.
+
+SELECT dispo dsnam
+  INTO CORRESPONDING FIELDS OF TABLE gt_t024d
+  FROM t024d
+  WHERE werks EQ pa_wer.
+
+SELECT ekgrp eknam
+  INTO CORRESPONDING FIELDS OF TABLE gt_t024
+  FROM t024.
+
+SORT : gt_makt  BY matnr,
+       gt_t023t BY matkl,
+       gt_t024d BY dispo,
+       gt_t024  BY ekgrp.
+
+LOOP AT gt_data.
+
+  READ TABLE gt_makt INTO gs_makt WITH KEY matnr = gt_data-matnr BINARY SEARCH.
+
+  IF sy-subrc EQ 0.
+
+    gt_data2-maktx = gs_makt-maktx.
+
+  ENDIF.
+
+  READ TABLE gt_t023t INTO gs_t023t WITH KEY matkl = gt_data-matkl BINARY SEARCH.
+
+  IF sy-subrc EQ 0.
+
+    gt_data2-wgbez = gs_t023t-wgbez.
+
+  ENDIF.
+
+  READ TABLE gt_t024d INTO gs_t024d WITH KEY dispo = gt_data-dispo BINARY SEARCH.
+
+  IF sy-subrc EQ 0.
+
+    gt_data2-dsnam = gs_T024D-dsnam.
+
+  ENDIF.
+
+  READ TABLE gt_t024 INTO gs_t024 WITH KEY ekgrp = gt_data-ekgrp BINARY SEARCH.
+
+  IF sy-subrc EQ 0.
+
+    gt_data2-eknam = gs_t024-eknam.
+
+  ENDIF.
+
+  MOVE-CORRESPONDING gt_data TO gt_data2.
+  APPEND gt_data2.
+  CLEAR gt_data2.
+
+ENDLOOP.
+
+cl_demo_output=&gt;display( gt_data2[] ).
+
+<font color ="#0000FF">*BREAK-POINT.</font>
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T01 Selection Condition</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_WER D       .</font>
+<font color ="#0000FF">* SO_MAT D       .</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

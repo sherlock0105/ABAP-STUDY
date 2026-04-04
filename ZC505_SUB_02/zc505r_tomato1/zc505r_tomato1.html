@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_TOMATO1</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_TOMATO1</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Report ZC505R_TOMATO1</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_TOMATO1</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_tomato1 MESSAGE-ID zc505m.
+
+TABLES :mast, stko.
+
+DATA : BEGIN OF gs_mat,
+         matnr  TYPE mast-matnr,
+         maktx  TYPE makt-maktx,
+         werks  TYPE mast-werks,
+         name1  TYPE t001w-name1,
+         stlty  TYPE stko-stlty,
+         stlan  TYPE mast-stlan,
+         stlnr  TYPE stko-stlnr,
+         stlkn  TYPE stpo-stlkn,
+         stlal  TYPE stko-stlal,
+         stkoz  TYPE stko-stkoz,
+         andat  TYPE stko-andat,
+         postp  TYPE stpo-postp,
+         ptext  TYPE t418t-ptext,
+         bmein  TYPE stko-bmein,
+         stpoz  TYPE stpo-stpoz,
+         idnrk  TYPE stpo-idnrk,
+         maktx2 TYPE makt-maktx,
+         menge  TYPE stpo-menge,
+         posnr  TYPE stpo-posnr,
+       END OF gs_mat,
+
+       gt_mat   LIKE TABLE OF gs_mat,
+       lv_space TYPE stpo-postp.
+
+CLEAR   : gs_mat, lv_space.
+REFRESH : gt_mat.
+
+
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-001.
+
+  PARAMETERS : pa_werk TYPE mast-werks OBLIGATORY DEFAULT '0001'.
+
+  SELECT-OPTIONS : so_ma FOR mast-matnr,  "인터널 테이블
+                   so_st FOR stko-stlnr.
+
+  PARAMETERS : pa_ra1 RADIOBUTTON GROUP rb1, "Compatible
+               pa_ra2 RADIOBUTTON GROUP rb1,
+               pa_ra3 RADIOBUTTON GROUP rb1.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+CASE 'X'.
+  WHEN pa_ra1. "pa_ral 이 클릭되면 X, 아니면 SPACE 값, C가 들어갔을때 POSTP 가 C만 나온다.
+
+    lv_space = 'C'.
+
+  WHEN pa_ra2.
+
+    lv_space = 'L'.
+
+ENDCASE.
+
+SELECT c~stlkn c~postp c~stpoz c~idnrk c~menge c~posnr "stpo
+       b~stlty b~stlnr b~stlal b~stkoz b~andat b~bmein "stko
+       a~matnr a~werks a~stlan "mast
+       d~maktx
+       e~name1
+  INTO CORRESPONDING FIELDS OF TABLE gt_mat
+  FROM stpo AS c
+ INNER JOIN stko AS b
+    ON c~stlty EQ b~stlty
+ INNER JOIN mast AS a
+    ON c~stlnr EQ a~stlnr
+  LEFT OUTER JOIN makt AS d
+    ON a~matnr = d~matnr
+  LEFT OUTER JOIN t001w AS e
+    ON a~werks EQ e~werks
+ WHERE c~postp = lv_space.
+
+IF pa_ra3 = 'X'.
+
+ SELECT c~stlkn c~postp c~stpoz c~idnrk c~menge c~posnr "stpo
+       b~stlty b~stlnr b~stlal b~stkoz b~andat b~bmein "stko
+       a~matnr a~werks a~stlan "mast
+       d~maktx
+       e~name1
+  INTO CORRESPONDING FIELDS OF TABLE gt_mat
+  FROM stpo AS c
+ INNER JOIN stko AS b
+    ON c~stlty EQ b~stlty
+ INNER JOIN mast AS a
+    ON c~stlnr EQ a~stlnr
+  LEFT OUTER JOIN makt AS d
+    ON a~matnr = d~matnr
+  LEFT OUTER JOIN t001w AS e
+    ON a~werks EQ e~werks.
+
+ENDIF.
+
+IF sy-subrc NE space.
+  "데이터가 없는데도 조회되는게 싫음. 아래 로직을 타지 않게 STOP 을 적어준다.
+  "내가 조회하는 데이터가 없을때!.
+  MESSAGE s001 DISPLAY LIKE 'E'.
+  STOP.
+ENDIF.
+
+cl_demo_output=&gt;display( gt_mat ).
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_RA1         Compatible</font>
+<font color ="#0000FF">* PA_RA2         Stock Item</font>
+<font color ="#0000FF">* PA_RA3         All</font>
+<font color ="#0000FF">* PA_WERK D       .</font>
+<font color ="#0000FF">* SO_MA D       .</font>
+<font color ="#0000FF">* SO_ST D       .</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505FM_GET_MAKTX</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for function: ZC505FM_GET_MAKTX</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [C5] Get maktx</b></font>
+<hr>
+<pre width="100">
+FUNCTION zc505fm_get_maktx.
+<font color ="#0000FF">*"----------------------------------------------------------------------</font>
+<font color ="#0000FF">*"*"Local Interface:</font>
+<font color ="#0000FF">*"  IMPORTING</font>
+<font color ="#0000FF">*"     REFERENCE(IV_MATNR) TYPE  MATNR</font>
+<font color ="#0000FF">*"     REFERENCE(IV_SPRAS) TYPE  SPRAS OPTIONAL</font>
+<font color ="#0000FF">*"  EXPORTING</font>
+<font color ="#0000FF">*"     REFERENCE(EV_MAKTX) TYPE  MAKTX</font>
+<font color ="#0000FF">*"     REFERENCE(PE_CODE) TYPE  CHAR1</font>
+<font color ="#0000FF">*"     REFERENCE(PE_MSG) TYPE  CHAR100</font>
+<font color ="#0000FF">*"----------------------------------------------------------------------</font>
+
+<font color ="#0000FF">*       <a href ="global-zc505fm_get_maktx.html">Global data declarations</a></font>
+
+  DATA : lv_spras TYPE sy-langu.
+<font color ="#0000FF">*입력값 체크해보자 : Export Parameter 을 사용한 경우</font>
+  IF iv_matnr IS INITIAL. "입력이 안되어 있는 상태, 필수값인데, 그러면 덤프난다.
+<font color ="#0000FF">*iv_matnr 이 입력 안됐다고 에러 메세지 줘야함.</font>
+    pe_code = 'E'.
+    pe_msg  = 'Material code is required'.
+    EXIT.
+  ENDIF.
+
+<font color ="#0000FF">*iv_spras optional 체크 필수 입력이 아님, 안 넣어도 된다. 예외 상황이 아님!</font>
+  IF iv_spras IS INITIAL.
+    lv_spras = sy-langu.
+  ELSE.
+    lv_spras = iv_spras.
+  ENDIF.
+
+<font color ="#0000FF">* 근데 얘가 데이터를 조회했음 근데 데이터가 없음, 그럼 예외 상황인거임.</font>
+  SELECT SINGLE maktx
+    INTO ev_maktx
+    FROM makt
+   WHERE matnr EQ iv_matnr "RTX001
+     AND spras EQ iv_spras. "EN
+
+  IF sy-subrc NE 0. ": Export Parameter 을 사용한 경우
+    pe_code  = 'E'.
+    pe_msg   = 'Data not found'.
+  ELSE.
+    pe_code = 'S'.
+  ENDIF.
+
+<font color ="#0000FF">*  IF sy-subrc NE 0.</font>
+<font color ="#0000FF">*    RAISE data_not_found.</font>
+<font color ="#0000FF">*  ELSE.</font>
+<font color ="#0000FF">*    pe_code = 'S'.</font>
+<font color ="#0000FF">*  ENDIF.</font>
+
+
+ENDFUNCTION.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505RLECT13</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505RLECT13</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [C5] 신문법</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505RLECT13</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505rlect13 MESSAGE-ID zc505m.
+
+DATA : BEGIN OF ls_scarr,
+         carrid   TYPE scarr-carrid,
+         carrname TYPE scarr-carrname,
+         currcode TYPE scarr-currcode,
+         url      TYPE scarr-url,
+         connid   TYPE spfli-connid,
+       END OF ls_scarr,
+
+       lt_scarr  LIKE TABLE OF ls_scarr,
+       lt_scarr3 LIKE TABLE OF ls_scarr,
+       lv_carrid TYPE scarr-carrid VALUE 'DL'.
+
+SELECT carrid carrname currcode url
+  INTO CORRESPONDING FIELDS OF TABLE lt_scarr
+  FROM scarr.
+
+LOOP AT lt_scarr INTO ls_scarr.
+
+ENDLOOP.
+
+lt_scarr3 = lt_scarr.
+
+<font color ="#0000FF">*신문법*********************************************************************</font>
+
+SELECT carrid, carrname, currcode, url
+  INTO TABLE @DATA(lt_scarr2)
+  FROM scarr
+ WHERE carrid   = @lv_carrid
+   AND currcode = 'USD'.
+
+LOOP AT lt_scarr2 INTO DATA(ls_scarr2).
+
+ENDLOOP.
+
+DATA(lt_scarr4)  = lt_scarr2.
+DATA(lv_connid)  = ls_scarr-connid.
+DATA(lv_carrid2) = lv_carrid.
+
+<font color ="#0000FF">**********************************************************************</font>
+
+DATA : lv_carrid3  TYPE scarr-carrid,
+       lv_currcode TYPE scarr-currcode.
+
+SELECT SINGLE carrid currcode
+  INTO ( lv_carrid3, lv_currcode )
+  FROM scarr.
+
+READ TABLE lt_scarr INTO ls_scarr WITH KEY carrid = 'AA'.
+
+LOOP AT lt_scarr INTO ls_scarr.
+
+ENDLOOP.
+
+<font color ="#0000FF">*신문법*********************************************************************</font>
+
+SELECT SINGLE carrid, currcode
+  INTO (@DATA(lv_carrid4), @DATA(lv_currcode2))
+  FROM scarr.
+<font color ="#0000FF">*Structure 바로 선언하면서 사용</font>
+READ TABLE lt_scarr INTO DATA(ls_scarr3) WITH KEY carrid ='AA'.
+
+LOOP AT lt_scarr INTO DATA(ls_scarr4).
+
+ENDLOOP.
+
+<font color ="#0000FF">**********************************************************************</font>
+<font color ="#0000FF">*스트럭쳐에 값 할당</font>
+TYPES : BEGIN OF lty_matnr,
+          matnr TYPE mara-matnr,
+          mtart TYPE mara-mtart,
+          werks TYPE marc-werks,
+        END OF lty_matnr.
+
+DATA : BEGIN OF ls_matnr,
+         matnr TYPE mara-matnr,
+         mtart TYPE mara-mtart,
+         werks TYPE marc-werks,
+       END OF ls_matnr,
+
+       lt_matnr LIKE TABLE OF ls_matnr.
+
+CLEAR   : ls_matnr.
+
+ls_matnr-matnr = 'RTX0001'.
+ls_matnr-mtart = 'FERT'.
+ls_matnr-werks = '0001'.
+
+
+ls_matnr-matnr = 'STEEL01'.
+ls_matnr-mtart = 'HALB'.
+
+<font color ="#0000FF">*신문법**********************************************************************</font>
+
+ls_matnr = VALUE #( "받기 전에 CLEAR
+                    matnr = 'RTX0001' mtart = 'FERT' werks = '0001'
+                   ).
+
+ls_matnr = VALUE #( BASE ls_matnr "명시적 필드만 바꾸고 나머지는 유지
+                    matnr = 'STEEL01' mtart = 'HALB'
+                   ).
+
+CLEAR : ls_matnr.
+REFRESH : lt_matnr.
+
+ls_matnr-matnr = 'RTX0001'.
+ls_matnr-mtart = 'FERT'.
+ls_matnr-werks = '0001'.
+
+APPEND ls_matnr TO lt_matnr.
+CLEAR  ls_matnr.
+
+
+ls_matnr-matnr = 'STEEL01'.
+ls_matnr-mtart = 'HALB'.
+ls_matnr-werks = '0001'.
+
+APPEND ls_matnr TO lt_matnr.
+CLEAR  ls_matnr.
+
+ls_matnr-matnr = 'ALUMI100'.
+ls_matnr-mtart = 'ROH'.
+ls_matnr-werks = '0001'.
+
+APPEND ls_matnr TO lt_matnr.
+CLEAR  ls_matnr.
+
+<font color ="#0000FF">*신문법</font>
+
+lt_matnr = VALUE #( "Structure 가 필요없음
+                    ( matnr = 'RTX0001' mtart = 'FERT' werks = '0001' )
+                    ( matnr = 'STEEL01' mtart = 'HALB' werks = '0001' )
+                  ).
+
+lt_matnr = VALUE #( BASE lt_matnr
+                    ( matnr = 'ALUMI100' mtart = 'ROH' werks = '0001' )
+                  ).
+
+<font color ="#0000FF">*MOVE-CORRESPONDING</font>
+DATA : ls_mat LIKE ls_matnr,
+       lt_mat LIKE lt_matnr.
+
+MOVE-CORRESPONDING ls_matnr TO ls_mat.
+MOVE-CORRESPONDING lt_matnr TO lt_mat.
+
+<font color ="#0000FF">*신문법</font>
+ls_mat = CORRESPONDING #( ls_matnr ).
+lt_mat = CORRESPONDING #( lt_matnr ).
+
+READ TABLE lt_matnr INTO ls_matnr WITH KEY matnr ='STEEL01'
+                                           mtart = 'HALB'.
+
+<font color ="#0000FF">*신문법</font>
+<font color ="#0000FF">*얘는 SUBRC 가 0으로 나온다.</font>
+CLEAR ls_matnr.
+
+ls_matnr = 'afadf'.
+ls_matnr = VALUE #( lt_matnr[ matnr = 'STEEL01'
+                              mtart = 'HALB' ] OPTIONAL ).
+"클리어를 왜?,,
+IF ls_matnr IS NOT INITIAL.
+  MESSAGE s001.
+ENDIF.
+
+READ TABLE lt_matnr INTO ls_matnr INDEX 2.
+
+<font color ="#0000FF">*신문법</font>
+CLEAR ls_matnr.
+ls_matnr = VALUE #( lt_matnr[ 2 ] OPTIONAL ).
+
+<font color ="#0000FF">**********************************************************************</font>
+DATA : ls_spfli TYPE spfli,
+       lt_spfli LIKE TABLE OF ls_spfli.
+
+SELECT carrid connid airpfrom airpto
+  INTO CORRESPONDING FIELDS OF TABLE lt_spfli
+  FROM spfli.
+
+LOOP AT lt_spfli INTO ls_spfli.
+
+  CASE ls_spfli-carrid.
+    WHEN 'JL'.
+      ls_spfli-carrid = 'KA'.
+
+      MODIFY lt_spfli FROM ls_spfli INDEX sy-tabix TRANSPORTING carrid.
+
+  ENDCASE.
+
+ENDLOOP.
+
+<font color ="#0000FF">*신문법</font>
+SELECT CASE carrid
+       	WHEN 'JL' THEN 'KA'
+        ELSE carrid
+       END AS carrid, connid, airpfrom, airpto,
+       concat_with_space( carrid, connid, 2 ) AS aaa,
+       concat( carrid, connid ) AS bbb
+  FROM spfli
+  INTO TABLE @DATA(lt_spfli2).
+
+<font color ="#0000FF">**********************************************************************</font>
+
+<font color ="#0000FF">*FAE  .</font>
+DATA : BEGIN OF ls_key,
+         carrid TYPE sflight-carrid,
+         connid TYPE sflight-connid,
+       END OF ls_key,
+
+       lt_key LIKE TABLE OF ls_key,
+       lt_fli TYPE TABLE OF sflight.
+
+SORT lt_key BY carrid connid.
+DELETE ADJACENT DUPLICATES FROM lt_key COMPARING carrid connid.
+
+IF lt_key IS NOT INITIAL.
+
+  SELECT carrid connid fldate price currency
+    INTO CORRESPONDING FIELDS OF TABLE lt_fli
+    FROM sflight
+    FOR ALL ENTRIES IN lt_key " AS 불가
+   WHERE carrid = lt_key-carrid
+     AND connid = lt_key-connid
+     AND currency = 'USD'.
+
+ENDIF.
+
+<font color ="#0000FF">*신문법  INITIAL 체크 안해도 된다.</font>
+SORT lt_key BY carrid connid.
+DELETE ADJACENT DUPLICATES FROM lt_key COMPARING carrid connid.
+
+SELECT b~carrid, b~connid, a~fldate, a~price, a~currency
+  FROM sflight AS a
+ INNER JOIN @lt_key AS b
+    ON a~carrid EQ b~carrid
+   AND a~connid EQ b~connid
+ WHERE a~currency EQ 'USD'
+  INTO CORRESPONDING FIELDS OF TABLE @lt_fli.
+
+<font color ="#0000FF">**********************************************************************</font>
+DATA : ls_fli LIKE LINE OF lt_fli,
+       lv_max TYPE sflight-price,
+       lv_avg TYPE dmbtr.
+
+SORT lt_fli BY price DESCENDING.
+
+READ TABLE lt_fli INTO ls_fli INDEX 1.
+
+IF sy-subrc EQ 0.
+  lv_max = ls_fli-price.
+ENDIF.
+
+<font color ="#0000FF">*신문법*********************************************************************</font>
+
+SELECT MAX( a~price ) AS max_price, AVG( a~price ) AS avg_price
+  FROM @lt_fli AS a
+  INTO ( @lv_max, @lv_avg ).
+
+<font color ="#0000FF">*나중에 찾아서 연습해보기,,지금은 너무 졸령</font>
+<font color ="#0000FF">*SELECT SINGLE COALESCE( carrid, '없음' ) as carrid</font>
+<font color ="#0000FF">*  INTO @DATA(lv_col)</font>
+<font color ="#0000FF">*  FROM scarr</font>
+<font color ="#0000FF">* WHERE carrid = @space.</font>
+
+<font color ="#0000FF">**********************************************************************</font>
+
+<font color ="#0000FF">*서브쿼리 사용</font>
+SELECT carrid fldate connid price currency
+  INTO CORRESPONDING FIELDS OF TABLE lt_fli
+  FROM sflight AS a
+ WHERE fldate EQ ( SELECT MAX( fldate )
+                    FROM sflight
+                   WHERE carrid EQ a~carrid ).
+
+<font color ="#0000FF">**********************************************************************</font>
+<font color ="#0000FF">*INLINE VIEW : FROM 절에 서브쿼리를 둔 경우...</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECT carrid, connid, fldate, price</font>
+<font color ="#0000FF">*  FROM sfli</font>
+
+WITH +sflight AS ( SELECT carrid, connid, fldate, price, currency, planetype
+                     FROM sflight
+                    WHERE carrid IN ( 'AA', 'DL' )
+                  ),
+     +schedule AS ( SELECT carrid, connid, airpfrom
+                      FROM spfli
+                     WHERE carrid IN ( 'AA', 'DL' )
+                  )
+
+
+SELECT a~carrid, a~connid, b~fldate, b~price
+  FROM +schedule AS a
+ INNER JOIN +sflight AS b
+    ON a~carrid EQ b~carrid
+   AND a~connid EQ b~connid
+ WHERE a~carrid EQ 'AA'
+  INTO TABLE @DATA(lt_ddd).
+
+cl_demo_output=&gt;display( lt_ddd ).
+
+<font color ="#0000FF">**********************************************************************</font>
+<font color ="#0000FF">*IF</font>
+
+DATA : lv_num      TYPE i VALUE 10,
+       lv_char(10).
+
+IF lv_num &gt; 5.
+  lv_char = '크다'.
+ELSE.
+  lv_char = '작다'.
+ENDIF.
+
+<font color ="#0000FF">*신문법</font>
+" COND — 조건 표현식 (IF의 신문법 버전)
+lv_char = COND #( WHEN lv_num &gt; 5 THEN '일단 크다'
+                  ELSE '작아' ).
+
+"LET … IN — 임시 변수 선언
+lv_char = COND #( LET vNum = 7 IN
+                  WHEN vNum &gt; 5 THEN '일단 커'
+                  ELSE '작아,,,,').
+
+MESSAGE s000 WITH lv_char.
+
+<font color ="#0000FF">*BREAK-POINT.</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*000   & & & &</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

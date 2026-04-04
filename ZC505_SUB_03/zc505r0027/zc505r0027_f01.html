@@ -1,0 +1,246 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0027_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0027_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0027_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZC505R0027_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  DATA : lv_code,
+         lv_msg(100),
+         lcl_flight TYPE REF TO zc505cl001.
+
+  CLEAR   : gs_data, lv_code, lv_msg.
+  REFRESH : gt_data.
+
+<font color ="#0000FF">*  CALL FUNCTION 'ZC505FM_GET_SFLIGHT'</font>
+<font color ="#0000FF">*    EXPORTING</font>
+<font color ="#0000FF">*      iv_carrid = pa_carr "Airline Code</font>
+<font color ="#0000FF">*    IMPORTING</font>
+<font color ="#0000FF">*      ev_code   = lv_code "'S' : Success, 'E' : Error</font>
+<font color ="#0000FF">*      ev_msg    = lv_msg  "Result Message</font>
+<font color ="#0000FF">*    TABLES</font>
+<font color ="#0000FF">*      et_data   = gt_data.</font>
+
+
+IF lcl_flight is NOT BOUND.
+  CREATE OBJECT lcl_flight.
+ENDIF.
+
+  CALL METHOD lcl_flight-&gt;get_sflight
+    EXPORTING
+      iv_carrid = pa_carr
+    IMPORTING
+      ev_code   = lv_code
+      ev_msg    = lv_msg
+    CHANGING
+      et_data   = gt_data.
+
+  IF lv_code NE 'S'.
+    MESSAGE s001.
+    LEAVE LIST-PROCESSING.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout-zebra      = 'X'. "행배경 줄무늬
+  gs_layout-cwidth_opt = 'A'.  "컬럼폭 자동 최적화
+  gs_layout-sel_mode   = 'D'.  "행단위 선택
+
+  gs_stable-row = 'X'. "행 유지
+  gs_stable-col = 'X'. "컬럼 유지
+
+  PERFORM make_fcat USING :
+     'X' 'STATUS'  TEXT-f01        ''  ' ',
+     'X' 'CARRID'     ' '   'SFLIGHT'  ' ',
+     'X' 'CONNID'     ' '   'SFLIGHT'  ' ',
+     'X' 'FLDATE'     ' '   'SFLIGHT'  ' ',
+     ' ' 'PRICE'      ' '   'SFLIGHT'  ' ',
+     ' ' 'CURRENCY'   ' '   'SFLIGHT'  ' ',
+     ' ' 'PLANETYPE'  ' '   'SFLIGHT'  ' ',
+     ' ' 'SEATSMAX'   ' '   'SFLIGHT'  ' ',
+     ' ' 'SEATSOCC'   ' '   'SFLIGHT'  ' ',
+     ' ' 'PAYMENTSUM' ' '   'SFLIGHT'  ' ',
+     ' ' 'SEATSMAX_B' ' '   'SFLIGHT'  ' ',
+     ' ' 'SEATSOCC_B' ' '   'SFLIGHT'  ' ',
+     ' ' 'SEATSMAX_F' ' '   'SFLIGHT'  ' ',
+     ' ' 'SEATSOCC_F' ' '   'SFLIGHT'  ' '.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat  USING  pv_key pv_field pv_text pv_ref_table pv_ref_field.
+
+  gs_fcat-key       = pv_key.
+  gs_fcat-fieldname = pv_field.
+  gs_fcat-coltext   = pv_text.
+  gs_fcat-ref_table = pv_ref_table.
+  gs_fcat-ref_field = pv_ref_field.
+
+  CASE pv_field.
+    WHEN 'PRICE'.
+      gs_fcat-cfieldname = 'CURRENCY'.
+      gs_fcat-do_sum     = 'X'.
+    WHEN 'PAYMENTSUM'.
+      gs_fcat-cfieldname = 'CURRENCY'.
+<font color ="#0000FF">*      gs_fcat-do_sum     = 'X'.</font>
+    WHEN 'STATUS'.
+      gs_fcat-icon = 'X'.
+    WHEN OTHERS.
+  ENDCASE.
+
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      side      = gcl_container-&gt;dock_at_left
+      extension = 5000.
+
+  CREATE OBJECT gcl_grid
+    EXPORTING
+      i_parent = gcl_container.
+
+  gs_variant-report = sy-repid.
+
+  CALL METHOD gcl_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant
+      i_save          = 'A'
+      i_default       = 'X'
+      is_layout       = gs_layout
+    CHANGING
+      it_outtab       = gt_data
+      it_fieldcatalog = gt_fcat
+      it_sort         = gt_sort.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_grid .
+
+  CALL METHOD gcl_grid-&gt;refresh_table_display
+    EXPORTING
+      is_stable      = gs_stable
+      i_soft_refresh = space.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_sort</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_sort .
+
+  gs_sort-fieldname = 'CARRID'.
+  gs_sort-spos      = '01'.
+  gs_sort-up        = 'X'.
+  gs_sort-subtot    = 'X'.
+  APPEND gs_sort TO gt_sort.
+  CLEAR  gs_sort.
+
+  gs_sort-fieldname = 'CONNID'.
+  gs_sort-spos      = '02'.
+  gs_sort-up        = 'X'.
+  gs_sort-subtot    = 'X'.
+  APPEND gs_sort TO gt_sort.
+  CLEAR  gs_sort.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_icon</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_icon .
+
+  DATA : lv_tabix TYPE sy-tabix.
+
+  LOOP AT gt_data INTO gs_data.
+
+    lv_tabix = sy-tabix.
+
+    gs_data-status = icon_ws_plane.
+
+    MODIFY gt_data FROM gs_data INDEX lv_tabix
+    TRANSPORTING status.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_init</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_init .
+
+  pa_carr = 'AA'.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

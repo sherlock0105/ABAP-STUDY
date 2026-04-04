@@ -1,0 +1,366 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505MANGO01_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505MANGO01_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505MANGO01_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZC505MANGO01_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  DATA : lr_carrid TYPE RANGE OF scarr-carrid,
+         lr_fldate TYPE RANGE OF sbook-fldate.
+
+  IF pa_car IS NOT INITIAL.
+
+    lr_carrid = VALUE #( BASE lr_carrid
+                      ( low    = pa_car
+                        sign   = 'I'
+                        option = 'EQ' )
+                       ).
+
+  ENDIF.
+
+  IF pa_fld IS NOT INITIAL.
+
+    lr_fldate = VALUE #( BASE lr_fldate
+                      ( low    = pa_fld
+                        sign   = 'I'
+                        option = 'EQ' )
+                       ).
+
+  ENDIF.
+
+  SELECT *
+    FROM zc505cds0025
+    INTO CORRESPONDING FIELDS OF TABLE @gt_data
+   WHERE carrid IN @lr_carrid
+     AND fldate IN @lr_fldate
+   ORDER BY carrid, connid, fldate.
+
+  IF gt_data IS INITIAL.
+    MESSAGE s001. "Data not found
+    LEAVE LIST-PROCESSING.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_param</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_param .
+
+<font color ="#0000FF">*  pa_car = 'AA'.</font>
+<font color ="#0000FF">*  pa_fld = '20250731'.</font>
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout = VALUE #(
+                        zebra      = 'X'
+                        cwidth_opt = 'A'
+                        sel_mode   = 'D'
+                        grid_title = 'Airline'
+                        smalltitle = 'X'
+                     ).
+
+  gs_stable = VALUE #(
+                       row  = 'X'
+                       col  = 'X'
+                      ).
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'ZC505CDSV0025'                 " Structure name (structure, table, view)
+    CHANGING
+      ct_fieldcat      = gt_fcat_data.                 " Field Catalog with Field Descriptions
+
+  LOOP AT gt_fcat_data ASSIGNING FIELD-SYMBOL(&lt;fs_fcat&gt;).
+
+    CASE &lt;fs_fcat&gt;-fieldname.
+
+      WHEN 'CARRNAME'.
+        &lt;fs_fcat&gt;-col_pos = 2.
+
+      WHEN 'SMOKER'.
+        &lt;fs_fcat&gt;-coltext = 'Smoker'.
+        &lt;fs_fcat&gt;-hotspot = 'X'.
+        &lt;fs_fcat&gt;-do_sum = 'X'.
+
+      WHEN 'FLDATE'.
+
+        &lt;fs_fcat&gt;-coltext = 'Fldate'.
+
+    ENDCASE.
+
+  ENDLOOP.
+
+<font color ="#0000FF">*  append</font>
+
+  PERFORM make_fcat   USING :
+  'X' 'ICON'       'Icon' 'ICON' ' ',
+<font color ="#0000FF">*  'X' 'CARRID'     ' ' 'SCARR' ' ',</font>
+<font color ="#0000FF">*  'X' 'FLDATE'     ' ' 'SBOOK' ' ',</font>
+  'X' 'BOOKID'     ' ' 'SBOOK' ' ',
+  ' ' 'CUSTOMID'   ' ' 'SBOOK' ' ',
+  ' ' 'CUSTTYPE'   ' ' 'SBOOK' ' ',
+  ' ' 'LUGGWEIGHT' ' ' 'SBOOK' ' ',
+  ' ' 'WUNIT'      ' ' 'SBOOK' ' ',
+  ' ' 'CLASS'      ' ' 'SBOOK' ' ',
+  ' ' 'ORDER_DATE' ' ' 'SBOOK' ' '.
+<font color ="#0000FF">*  ' ' 'SMOKER'     ' ' 'SBOOK' ' '.</font>
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      side      = gcl_container-&gt;dock_at_left     " Side to Which Control is Docked
+      extension = 5000.               " Control Extension
+
+  CREATE OBJECT gcl_splitter
+    EXPORTING
+      parent  = gcl_container                   " Parent Container
+      rows    = 1                   " Number of Rows to be displayed
+      columns = 2.                   " Number of Columns to be Displayed
+
+  CALL METHOD gcl_splitter-&gt;get_container
+    EXPORTING
+      row       = 1                  " Row
+      column    = 1                 " Column
+    RECEIVING
+      container = gcl_container_data.                 " Container
+
+  CALL METHOD gcl_splitter-&gt;get_container
+    EXPORTING
+      row       = 1                  " Row
+      column    = 2                 " Column
+    RECEIVING
+      container = gcl_container_smoker.                 " Container
+
+  CREATE OBJECT gcl_grid_data
+    EXPORTING
+      i_parent = gcl_container_data.                  " Parent Container
+
+  CREATE OBJECT gcl_grid_smoker
+    EXPORTING
+      i_parent = gcl_container_smoker.                  " Parent Container
+
+  CALL METHOD gcl_splitter-&gt;set_column_width
+    EXPORTING
+      id    = 1                   " Row ID
+      width = 40.                 " Height
+
+  SET HANDLER : lcl_event_handler=&gt;handle_hotspot_click FOR gcl_grid_data.
+
+  gs_variant-report = sy-repid.
+  gs_variant-handle = 'UP'.
+
+  CALL METHOD gcl_grid_data-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant                  " Layout
+      i_save          = 'A'                 " Save Layout
+      i_default       = 'X'              " Default Display Variant
+      is_layout       = gs_layout                " Layout
+    CHANGING
+      it_outtab       = gt_data                 " Output Table
+      it_sort         = gt_sort
+      it_fieldcatalog = gt_fcat_data.                 " Field Catalog
+
+  gs_variant-handle = 'DN'.
+
+  CALL METHOD gcl_grid_smoker-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant                  " Layout
+      i_save          = 'A'                 " Save Layout
+      i_default       = 'X'              " Default Display Variant
+      is_layout       = gs_layout                " Layout
+    CHANGING
+      it_outtab       = gt_smoker                 " Output Table
+      it_fieldcatalog = gt_fcat_smoker.                 " Field Catalog
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_smoker</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_smoker  USING pv_carrid TYPE scarr-carrid
+                       pv_connid TYPE sbook-connid
+                       pv_fldate TYPE zc505cds0025-fldate.
+
+  REPLACE ALL OCCURRENCES OF '-' IN pv_fldate WITH ''.
+
+<font color ="#0000FF">*  pv_fldate = pv_fldate+0(4) && pv_fldate+5(2) && pv_fldate+8(2).</font>
+
+  CALL METHOD zc505cl_amdp_06=&gt;get_data
+    EXPORTING
+      iv_carrid = pv_carrid
+      iv_connid = pv_connid
+      iv_fldate = pv_fldate
+    IMPORTING
+      et_data   = DATA(lt_smoker).
+
+  IF lt_smoker IS NOT INITIAL.
+
+    SORT lt_smoker BY bookid.
+    gt_smoker = CORRESPONDING #( lt_smoker ).
+
+  ELSE.
+
+    REFRESH gt_smoker.
+    PERFORM refresh_grid.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat  USING    pv_key
+                         pv_field
+                         pv_text
+                         pv_ref_table
+                         pv_ref_field.
+
+  DATA(gs_fcat) = VALUE lvc_s_fcat(
+                          key       = pv_key
+                          fieldname = pv_field
+                          coltext   = pv_text
+                          ref_table = pv_ref_table
+                          ref_field = pv_ref_field
+                                   ).
+
+  CASE pv_field.
+    WHEN 'SMOKER'.
+      gs_fcat-checkbox = 'X'.
+    WHEN 'LUGGWEIGHT'.
+      gs_fcat-qfieldname = 'WUNIT'.
+    WHEN 'ICON'.
+      gs_fcat-icon = 'X'.
+  ENDCASE.
+
+  APPEND gs_fcat TO gt_fcat_smoker.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_hotspot_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW_ID</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN_ID</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_hotspot_click  USING   ps_row TYPE lvc_s_row
+                                   ps_col TYPE lvc_s_col.
+
+  IF ps_row-rowtype IS NOT INITIAL.
+    EXIT.
+  ENDIF.
+
+<font color ="#0000FF">*  READ TABLE gt_data INTO gs_data INDEX ps_row-index.</font>
+
+  gs_data = VALUE #( gt_data[ ps_row-index ] OPTIONAL ).
+
+  PERFORM get_smoker USING gs_data-carrid
+                           gs_data-connid
+                           gs_data-fldate.
+
+  IF gt_smoker IS INITIAL.
+    MESSAGE s000 WITH gs_data-fldate 'Smoker not found'.
+    EXIT.
+  ENDIF.
+
+  PERFORM refresh_grid.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_grid .
+
+  CALL METHOD gcl_grid_smoker-&gt;refresh_table_display
+    EXPORTING
+      is_stable      = gs_stable                  " With Stable Rows/Columns
+      i_soft_refresh = space.                 " Without Sort, Filter, etc.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form sort_table</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM sort_table .
+
+  gt_sort = VALUE lvc_t_sort(
+    ( fieldname = 'CARRID'
+      spos      = '01'
+      up        = 'X'
+      subtot    = 'X' )
+
+    ( fieldname = 'CONNID'
+      spos      = '02'
+<font color ="#0000FF">*      up        = 'X'</font>
+      subtot    = 'X')
+  ).
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

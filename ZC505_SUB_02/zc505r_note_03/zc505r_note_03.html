@@ -1,0 +1,309 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_03</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_03</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  ZC505R_NOTE_03</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_03</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_03.
+
+<font color ="#0000FF">*11월 25일 실습1</font>
+
+<font color ="#0000FF">*BEGIN OF … END OF 방식으로 구조체 생성</font>
+
+DATA :ls_tab2  TYPE zc505t0002,
+      ls_str   TYPE zc505s0005,
+      lt_str   TYPE TABLE OF zc505s0005,
+      lv_matnr TYPE mara-matnr,
+
+      BEGIN OF ls_str2,
+        matnr    TYPE mara-matnr,
+        plant    TYPE marc-werks,
+        mtart    TYPE mara-mtart,
+        matkl    TYPE mara-matkl,
+        pstat    TYPE marc-pstat,
+        sloc     TYPE mard-lgort,
+        cnt      TYPE i,
+        flag,
+        avg      TYPE p DECIMALS 3,
+        material LIKE lv_matnr,
+        werks    TYPE werks_d,
+      END OF ls_str2,
+      lt_str2 LIKE TABLE OF ls_str2.
+
+ls_str2-matnr = 'ST_10'.
+ls_str2-matkl = 'GRP01'.
+
+<font color ="#0000FF">*값 세팅 후 APPEND로 내부테이블 추가</font>
+
+APPEND ls_str2 TO  lt_str2.
+CLEAR ls_str2.
+<font color ="#0000FF">*CLEAR ls_str2. 로 구조체 초기화</font>
+
+ls_str2-matnr = 'ST_11'.
+ls_str2-matkl = 'GRP02'.
+
+APPEND ls_str2 TO  lt_str2.
+CLEAR ls_str2.
+
+ls_str2-werks = '1010'.
+
+APPEND ls_str2 TO  lt_str2.
+CLEAR ls_str2.
+
+<font color ="#0000FF">*cl_demo_output=&gt;display( lt_str2 ).</font>
+
+
+
+<font color ="#0000FF">*실습2</font>
+
+DATA: ls_str3 TYPE zc505t0018,
+      ls_time TYPE zc505stimestamp,
+      BEGIN OF ls_str4,
+        bukrs       TYPE bkpf-bukrs,
+        belnr       TYPE bkpf-belnr,
+        buzei       TYPE bseg-buzei,
+        gjahr       TYPE bkpf-gjahr,
+        budat       TYPE bkpf-budat,
+        dmbtr       TYPE bseg-dmbtr,
+        wrbtr       TYPE bseg-wrbtr,
+        waers       TYPE bkpf-waers.
+        include structure <a href ="zc505stimestamp/dictionary-zc505stimestamp.html">zc505stimestamp</a>.
+<font color ="#0000FF">*        타임스탬프용 커스텀 구조체 포함</font>
+DATA:  bigo(50),
+        apply_no(3) TYPE n,
+        percentage  TYPE p DECIMALS 3,
+      END OF ls_str4,
+
+      lt_str4 LIKE TABLE OF ls_str4.
+
+<font color ="#0000FF">*****실습3*****************************************************************</font>
+
+DATA:BEGIN OF ls_str5,
+       vbeln TYPE vbak-vbeln,
+       posnr TYPE vbap-posnr,
+       angdt TYPE vbak-angdt,
+       vbtyp TYPE vbak-vbtyp,
+       matwa TYPE vbap-matwa,
+       arktx TYPE vbap-arktx.
+       INCLUDE STRUCTURE tds_sd_prodh_univ_node.
+       INCLUDE STRUCTURE j_1bsd_tc_det.
+DATA : zmeng TYPE vbap-zmeng,
+       meins TYPE vbap-meins,
+       flag,
+     END OF ls_str5,
+     ls_mat TYPE zc505t0002,
+
+<font color ="#0000FF">*   테이블에서 필드 가져오기</font>
+     BEGIN OF ls_mat2.
+       include structure <a href ="zc505t0002/dictionary-zc505t0002.html">zc505t0002</a>.
+DATA: matnr TYPE mara-matnr,
+       werks TYPE marc-werks,
+     END OF ls_mat2.
+
+<font color ="#0000FF">*include strcture 는 만득이가 중첩되어 2개 참조할 수 없다.</font>
+
+
+<font color ="#0000FF">*****실습4**** 텍스트 필드 찾기*************************************************************</font>
+
+DATA :BEGIN OF ls_str6,
+        mblnr       TYPE mseg-mblnr,
+        mjahr       TYPE mseg-mjahr,
+        zeile       TYPE mseg-zeile,
+        bwart       TYPE mseg-bwart,
+        btext       TYPE t156ht-btext, "text table
+        matnr       TYPE mseg-matnr,
+        maktx       TYPE makt-maktx, "text table
+        bnbtr       TYPE mseg-bnbtr,
+        waers       TYPE mseg-waers,
+        qty         TYPE p DECIMALS 3,
+        qty_unit(4),
+        man_cnt     TYPE int4,
+      END OF ls_str6,
+      lt_str6 LIKE TABLE OF ls_str6.
+
+
+ls_str6-matnr = 'ST_10'.
+
+APPEND ls_str6 TO lt_str6.
+
+ls_str6-matnr = 'ST_30'.
+
+APPEND ls_str6 TO lt_str6.
+
+ls_str6-matnr = 'ST_30'.
+
+<font color ="#0000FF">*스트럭처 같은 필드에는 값이 하나만 들어갈 수 있다</font>
+
+<font color ="#0000FF">****실습5******************************************************************</font>
+
+
+DATA : lv_num(10) TYPE n,
+       ls_fsh     TYPE fsh_msegdata_append,
+       lt_fsh     LIKE TABLE OF ls_fsh,
+       BEGIN OF ls_stu,
+         name(20),
+         count    TYPE int4.
+         INCLUDE STRUCTURE dac_s_metering_context.
+
+DATA : age      TYPE zc505de_age,
+         gender   TYPE zc505de_gender.
+         INCLUDE STRUCTURE fsh_plo.
+
+DATA : plnum    TYPE plaf-plnum,
+       END OF ls_stu,
+       lt_stu LIKE TABLE OF ls_stu.
+
+" 1번
+ls_stu-name                = '가일'.
+ls_stu-count               = '20'.
+ls_stu-dac_pp_component    = 'PP01'.
+ls_stu-age                 = '28'.
+ls_stu-gender              = 'M'.
+ls_stu-fsh_season          = 'SPRING'.
+
+APPEND ls_stu TO lt_stu.
+CLEAR ls_stu.
+
+"2번
+ls_stu-name             = '켄'.
+ls_stu-count            = '12'.
+ls_stu-dac_pp_component = 'PP03'.
+ls_stu-age              = '15'.
+ls_stu-gender           = 'M'.
+ls_stu-fsh_collection   = 'DOJANG'.
+
+APPEND ls_stu TO lt_stu.
+CLEAR ls_stu.
+
+"3번
+ls_stu-name                = '블랑카'.
+ls_stu-count               = '8'.
+ls_stu-dac_indirect_access ='X'.
+ls_stu-age                 = '32'.
+ls_stu-gender              = 'M'.
+ls_stu-fsh_collection      = 'JUNGLE'.
+
+APPEND ls_stu TO lt_stu.
+CLEAR ls_stu.
+<font color ="#0000FF">*4번</font>
+ls_stu-name                = '바이슨'.
+ls_stu-count               = '42'.
+ls_stu-dac_indirect_access ='X'.
+ls_stu-age                 = '33'.
+ls_stu-gender              = 'M'.
+ls_stu-fsh_theme           = 'STREET FIG'.
+
+APPEND ls_stu TO lt_stu.
+CLEAR ls_stu.
+<font color ="#0000FF">*5번</font>
+ls_stu-name                = '캐미'.
+ls_stu-count               = '28'.
+ls_stu-dac_indirect_access ='X'.
+ls_stu-age                 = '24'.
+ls_stu-gender              = 'F'.
+ls_stu-fsh_season_year     = '2025'.
+ls_stu-fsh_theme           = 'STREET FIG'.
+
+APPEND ls_stu TO lt_stu.
+CLEAR ls_stu.
+
+ls_stu-name              = '춘리'.
+ls_stu-count             = '21'.
+ls_stu-dac_creation_date = '20201125'.
+ls_stu-age               = '25'.
+ls_stu-gender            = 'F'.
+ls_stu-fsh_mplnd_ord     = '10000011'.
+ls_stu-fsh_season_year   = '2025'.
+ls_stu-fsh_theme         = 'STREET FIG'.
+
+APPEND ls_stu TO lt_stu.
+CLEAR ls_stu.
+
+<font color ="#0000FF">*cl_demo_output=&gt;display( lt_stu ).</font>
+
+<font color ="#0000FF">**실습6********************************************************************</font>
+
+DATA : BEGIN OF ls_lips,
+  vbeln TYPE lips-vbeln,
+  posnr TYPE lips-posnr,
+  pstyv TYPE lips-pstyv,
+  matnr TYPE lips-matnr,
+  matwa TYPE lips-matwa,
+  matkl TYPE lips-matkl,
+  END OF ls_lips,
+    lt_lips LIKE TABLE OF ls_lips.
+
+ls_lips-vbeln = '1000000001'.
+ls_lips-posnr = '10'.
+ls_lips-pstyv = 'ADP1'.
+ls_lips-matnr = 'T-RSP512'.
+ls_lips-matwa = 'ST_10'.
+ls_lips-matkl = '01'.
+
+APPEND ls_lips to lt_lips.
+CLEAR ls_lips.
+
+ls_lips-vbeln = '1000000002'.
+ls_lips-posnr = '20'.
+ls_lips-pstyv = 'ADP3'.
+ls_lips-matnr = 'T-ASA00'.
+ls_lips-matkl = '01'.
+
+APPEND ls_lips to lt_lips.
+CLEAR ls_lips.
+
+ls_lips-vbeln = '1000000003'.
+ls_lips-posnr = '30'.
+ls_lips-pstyv = 'AFC'.
+ls_lips-matnr = 'T-RSP512'.
+ls_lips-matkl = '02'.
+
+APPEND ls_lips to lt_lips.
+CLEAR ls_lips.
+
+ls_lips-vbeln = '1000000004'.
+ls_lips-posnr = '40'.
+ls_lips-pstyv = 'AGR'.
+ls_lips-matnr = 'T-SSP112'.
+ls_lips-matwa = 'WHEEL'.
+ls_lips-matkl = '01'.
+
+APPEND ls_lips to lt_lips.
+CLEAR ls_lips.
+
+ls_lips-vbeln = '1000000005'.
+ls_lips-posnr = '50'.
+
+APPEND ls_lips to lt_lips.
+CLEAR ls_lips.
+
+cl_demo_output=&gt;display( lt_lips ).
+
+<font color ="#0000FF">*select 연습</font>
+<font color ="#0000FF">*SELECT vbeln</font>
+<font color ="#0000FF">*       posnr</font>
+<font color ="#0000FF">*       pstyv</font>
+<font color ="#0000FF">*       matnr</font>
+<font color ="#0000FF">*       matwa</font>
+<font color ="#0000FF">*       matkl</font>
+<font color ="#0000FF">*  INTO CORRESPONDING FIELDS OF TABLE lt_lips</font>
+<font color ="#0000FF">*  FROM lips</font>
+<font color ="#0000FF">* WHERE vbeln BETWEEN '1000000001' AND '1000000005'.</font>
+
+BREAK-POINT.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

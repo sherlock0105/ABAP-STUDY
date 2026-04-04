@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_09</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_09</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  11월 29일</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_09</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_09 MESSAGE-ID zc505m. "Message Class oo 를 쓰겠다.
+
+<font color ="#0000FF">**실습********************************************************************</font>
+
+DATA : BEGIN OF ls_flight,
+         carrid    TYPE sflight-carrid,
+         connid    TYPE sflight-connid,
+         fldate    TYPE sflight-fldate,
+         price     TYPE sflight-price,
+         currency  TYPE sflight-currency,
+         planetype TYPE sflight-planetype,
+         seatsocc  TYPE sflight-seatsocc,
+       END OF ls_flight,
+
+       lt_flight LIKE TABLE OF ls_flight,
+       lv_tabix  TYPE sy-tabix.
+
+CLEAR   : ls_flight.
+REFRESH : lt_flight.
+
+SELECT carrid connid fldate price
+       currency planetype seatsocc
+  INTO CORRESPONDING FIELDS OF TABLE lt_flight
+  FROM sflight
+ WHERE currency  = 'USD'
+   AND planetype = '747-400'.
+
+IF sy-subrc NE 0.
+
+  WRITE : '데이터 없습니다.'.
+  STOP.
+
+ENDIF.
+
+LOOP AT lt_flight INTO ls_flight.
+
+  lv_tabix = sy-tabix.
+
+  ls_flight-price    = ls_flight-price + 1000.
+  ls_flight-seatsocc = ls_flight-seatsocc * 3.
+
+  MODIFY lt_flight FROM ls_flight INDEX lv_tabix
+  TRANSPORTING price seatsocc.
+
+ENDLOOP.
+
+<font color ="#0000FF">*cl_demo_output=&gt;display( lt_flight ).</font>
+
+<font color ="#0000FF">**실습********************************************************************</font>
+
+DATA:BEGIN OF ls_sbook,
+       carrid     TYPE sbook-carrid,
+       connid     TYPE sbook-connid,
+       fldate     TYPE sbook-fldate,
+       class      TYPE sbook-class,
+       luggweight TYPE sbook-luggweight,
+       wunit      TYPE sbook-wunit,
+       forcuram   TYPE sbook-forcuram,
+       forcurkey  TYPE sbook-forcurkey,
+     END OF ls_sbook,
+
+     lt_sbook  LIKE TABLE OF ls_sbook,
+     lv_tabix2 TYPE sy-tabix.
+
+CLEAR   : ls_sbook.
+REFRESH : lt_sbook .
+
+
+SELECT carrid connid fldate class
+       luggweight wunit forcuram forcurkey
+  INTO CORRESPONDING FIELDS OF TABLE lt_sbook
+  FROM sbook
+ WHERE carrid = '5L'
+   AND fldate IN ( '20251013', '20251216' ).
+
+IF sy-subrc NE 0.
+
+<font color ="#0000FF">**원시적 방법</font>
+<font color ="#0000FF">*  MESSAGE 'Data not found' TYPE 'I' DISPLAY LIKE 'E'.</font>
+<font color ="#0000FF">**  MESSAGE 'Data not found' TYPE 'I'.</font>
+<font color ="#0000FF">*  STOP.</font>
+
+  MESSAGE s000 WITH 'SAP' 'CODE' 'CLASS' '5' DISPLAY LIKE 'E'. "TYPE 쓰고 번호
+  STOP.
+
+ENDIF.
+
+LOOP AT lt_sbook INTO ls_sbook.
+
+  lv_tabix2 = sy-tabix.
+
+  CASE ls_sbook-fldate.
+
+    WHEN '20251013'.
+
+      ls_sbook-class = 'C'.
+
+      MODIFY lt_sbook FROM ls_sbook INDEX lv_tabix2
+      TRANSPORTING class.
+
+    WHEN '20251216'.
+
+      ls_sbook-class = 'F'.
+
+      MODIFY lt_sbook FROM ls_sbook INDEX lv_tabix2
+      TRANSPORTING class.
+
+  ENDCASE.
+
+ENDLOOP.
+
+cl_demo_output=&gt;display( lt_sbook ).
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*000   & & & &</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

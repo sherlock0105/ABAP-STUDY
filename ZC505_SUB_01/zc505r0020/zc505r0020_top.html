@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0020_TOP</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0020_TOP</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0020_TOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include ZC505R0020_TOP                           - Report ZC505R0020</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r0020 MESSAGE-ID zc505m.
+<font color ="#0000FF">**********************************************************************</font>
+TABLES : bkpf. "Select-options 에서 사용
+<font color ="#0000FF">**********************************************************************</font>
+<font color ="#0000FF">* 전역 구조체 선언</font>
+DATA : BEGIN OF gs_data,
+         status TYPE icon_d,
+         belnr  TYPE bseg-belnr,
+         buzei  TYPE bseg-buzei,
+         blart  TYPE bkpf-blart,
+         ltext  TYPE t003t-ltext, "blart text table
+         budat  TYPE bkpf-budat,
+         bschl  TYPE bseg-bschl,
+         koart  TYPE bseg-koart,
+         gsber  TYPE bseg-gsber,
+         gtext  TYPE tgsbt-gtext, "tgsbt text table
+         shkzg  TYPE bseg-shkzg,
+         dmbtr  TYPE bseg-dmbtr,
+         pswsl  TYPE bseg-pswsl,
+         color  TYPE lvc_t_scol,
+       END OF gs_data,
+
+       gt_data   LIKE TABLE OF gs_data,
+
+       gv_okcode TYPE sy-ucomm.
+<font color ="#0000FF">**********************************************************************</font>
+<font color ="#0000FF">*ALV 관련</font>
+DATA : gcl_container TYPE REF TO cl_gui_docking_container,
+       gcl_grid      TYPE REF TO cl_gui_alv_grid,
+       gs_fcat       TYPE lvc_s_fcat,
+       gt_fcat       TYPE lvc_t_fcat,
+       gs_variant    TYPE disvariant,
+       gs_layout     TYPE lvc_s_layo,
+       gs_stable     TYPE lvc_s_stbl,
+       gs_sort       TYPE lvc_s_sort,
+       gt_sort       TYPE lvc_t_sort.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

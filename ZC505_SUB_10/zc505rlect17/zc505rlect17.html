@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505RLECT17</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505RLECT17</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [C5] ADBC CODE 샘플</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505RLECT17</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505rlect17 MESSAGE-ID zc505m.
+<font color ="#0000FF">************************** TOP ***************************************</font>
+DATA : gs_sflight TYPE sflight,
+       gt_sflight LIKE TABLE OF gs_sflight.
+<font color ="#0000FF">**********************************************************************</font>
+
+<font color ="#0000FF">****************************** S01 ***********************************</font>
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-t01.
+  PARAMETERS : pa_carr TYPE sflight-carrid.
+SELECTION-SCREEN END OF BLOCK bl1.
+<font color ="#0000FF">**********************************************************************</font>
+
+START-OF-SELECTION.
+  PERFORM get_if_data.
+  PERFORM get_if_data_single.
+  PERFORM transaction_if_data.
+
+<font color ="#0000FF">*************************** F01 **************************************</font>
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_if_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_if_data .
+<font color ="#0000FF">* ADBC 통해서 ITAB 형식으로 결과를 받는 경우</font>
+
+<font color ="#0000FF">* ADBC 관련</font>
+  DATA : lcl_conn    TYPE REF TO cl_sql_connection, "DB Connection 맺을 Class
+         lcl_sql     TYPE REF TO cl_sql_statement,  "SQL 을 실행할 Class
+         lcl_result  TYPE REF TO cl_sql_result_set, "Select 결과를 받아올 Class
+         lr_data     TYPE REF TO data,              "DB에 가서 결과를 받아올 Data
+         lx_sql_exec TYPE REF TO cx_root,           "Exception 처리할 Class
+         lv_sql      TYPE string,                   "SQL을 담을 변수
+         lv_msg      TYPE string.                   "Exception 발생시 메시지 받을 변수
+
+  CLEAR   : gs_sflight.
+  REFRESH : gt_sflight.
+
+  TRY.
+<font color ="#0000FF">* DB Connection을 얻어온다.</font>
+<font color ="#0000FF">* Connection 이름은 Tcode : DB01(혹은 DBCO) 가서 DB Connection 버튼 클릭해서 Connection 이름 확인한다</font>
+      lcl_conn = cl_sql_connection=&gt;get_connection( 'HANADB' ).
+
+<font color ="#0000FF">* SQL 실행할 객체를 생성하면서 Connection 을 넘겨줌으로써 어디서</font>
+<font color ="#0000FF">* SQL을 실행할지 알려준다</font>
+      CREATE OBJECT lcl_sql
+        EXPORTING
+          con_ref = lcl_conn.
+
+<font color ="#0000FF">*      CONCATENATE 'SELECT CARRID, CONNID, FLDATE, PRICE, CURRENCY'</font>
+<font color ="#0000FF">*                  'FROM SFLIGHT'</font>
+<font color ="#0000FF">*                  'WHERE MANDT = '''        INTO lv_sql SEPARATED BY space.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*      CONCATENATE lv_sql sy-mandt ''''      INTO lv_sql.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*      CONCATENATE lv_sql ' AND CARRID = ''' INTO lv_sql.</font>
+<font color ="#0000FF">*      CONCATENATE lv_sql pa_carr ''''       INTO lv_sql.</font>
+
+<font color ="#0000FF">* DB에서 실행할 SQL을 작성한다</font>
+      lv_sql = | SELECT CARRID, CONNID, FLDATE, PRICE, CURRENCY | &&
+               |   FROM SFLIGHT                                 | &&
+               |  WHERE MANDT  = '{ sy-mandt }'                 | &&
+               |    AND CARRID = '{ pa_carr }'                  |.
+
+<font color ="#0000FF">* lcl_sql 이 주어진 SQL을 실행하고 결과를 lcl_result 에게 줘라~~~</font>
+      lcl_result = lcl_sql-&gt;execute_query( lv_sql ). "SQL 실행
+
+<font color ="#0000FF">* 결과를 받아오기 위해서 ITAB 과 DB 의 결과를 대신 받아올 객체와 동기화 시킴</font>
+      GET REFERENCE OF gt_sflight INTO lr_data.
+
+<font color ="#0000FF">* 결과 받으러 lr_data 객체가 들어감 : ITAB 형식으로 받기 위해서 set_param_table 메소드 호출함</font>
+      lcl_result-&gt;set_param_table( lr_data ).
+
+<font color ="#0000FF">* lr_data가 데이터를 받았다며? 그럼 gt_sflight에게 돌려줘</font>
+      lcl_result-&gt;next_package( ).
+<font color ="#0000FF">* DB 에서 볼일 다 봤으니 이제 끝내자</font>
+      lcl_result-&gt;close( ).
+
+    CATCH cx_sql_exception INTO lx_sql_exec. "에러 발생시 처리하는곳
+
+      lv_msg = lx_sql_exec-&gt;get_text( ). "에러 메시지 받는다
+
+      MESSAGE s000 WITH lv_msg DISPLAY LIKE 'E'.
+      EXIT.
+  ENDTRY.
+
+<font color ="#0000FF">* gt_sflight ITAB에 레코드가 들어왔으니 필요한 로직 작성</font>
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_if_data_single</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_if_data_single .
+<font color ="#0000FF">* ADBC 통해서 Structure 형식으로 결과를 받는 경우</font>
+
+<font color ="#0000FF">* ADBC 관련</font>
+  DATA : lcl_conn    TYPE REF TO cl_sql_connection,
+         lcl_sql     TYPE REF TO cl_sql_statement,
+         lcl_result  TYPE REF TO cl_sql_result_set,
+         lr_data     TYPE REF TO data,
+         lx_sql_exec TYPE REF TO cx_root,
+         lv_sql      TYPE string,
+         lv_msg      TYPE string.
+
+  CLEAR   : gs_sflight.
+  REFRESH : gt_sflight.
+
+  TRY.
+
+      lcl_conn = cl_sql_connection=&gt;get_connection( 'HANADB' ).
+
+      CREATE OBJECT lcl_sql
+        EXPORTING
+          con_ref = lcl_conn.
+
+      lv_sql = | SELECT CARRID, CONNID, FLDATE, PRICE, CURRENCY | &&
+               |   FROM SFLIGHT                                 | &&
+               |  WHERE MANDT  = '{ sy-mandt }'                 | &&
+               |    AND CARRID = '{ pa_carr }'                  |.
+
+      lcl_result = lcl_sql-&gt;execute_query( lv_sql ).
+
+      GET REFERENCE OF gs_sflight INTO lr_data.
+
+<font color ="#0000FF">* Structure 형태로 받으려고 set_param_struct 메소드 호출함</font>
+      lcl_result-&gt;set_param_struct( lr_data ).
+
+      lcl_result-&gt;next( ). "Structure 형태로 하나 받으므로 next 메소드 호출
+      lcl_result-&gt;close( ).
+
+    CATCH cx_sql_exception INTO lx_sql_exec. "에러 발생시 처리하는곳
+
+      lv_msg = lx_sql_exec-&gt;get_text( ). "에러 메시지 받는다
+
+      MESSAGE s000 WITH lv_msg DISPLAY LIKE 'E'.
+      EXIT.
+
+  ENDTRY.
+
+<font color ="#0000FF">* 필요한 로직 작성</font>
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form transaction_if_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM transaction_if_data .
+<font color ="#0000FF">* ADBC 통해서 Insert, Update, Delete 등을 수행함</font>
+
+<font color ="#0000FF">* ADBC 관련</font>
+  DATA : lcl_conn    TYPE REF TO cl_sql_connection,
+         lcl_sql     TYPE REF TO cl_sql_statement,
+         lr_data     TYPE REF TO data,
+         lx_sql_exec TYPE REF TO cx_root,
+         lv_sql      TYPE string,
+         lv_msg      TYPE string.
+
+  DATA : lv_mtart TYPE mara-mtart VALUE 'FERT',
+         lv_matkl TYPE mara-matkl VALUE '001',
+         lv_matnr TYPE mara-matnr VALUE 'ST_10'.
+
+  TRY.
+
+      lcl_conn = cl_sql_connection=&gt;get_connection( 'HANADB' ).
+
+      CREATE OBJECT lcl_sql
+        EXPORTING
+          con_ref = lcl_conn.
+
+      lv_sql = | UPDATE ZC526T0004 SET MTART = '{ lv_mtart }', | &&
+               |                       MATKL = '{ lv_matkl }'  | &&
+               | WHERE MATNR = '{ lv_matnr }'                  |.
+
+<font color ="#0000FF">* Transaction 일으키는 DML 이므로 execute_update 호출</font>
+      lcl_sql-&gt;execute_update( lv_sql ).
+
+    CATCH cx_sql_exception INTO lx_sql_exec. "에러 발생시 처리하는곳
+
+      lv_msg = lx_sql_exec-&gt;get_text( ). "에러 메시지 받는다
+
+      MESSAGE s000 WITH lv_msg DISPLAY LIKE 'E'.
+
+<font color ="#0000FF">* Transaction 에 실패 했다면 롤백 시킴</font>
+      lcl_conn-&gt;rollback( ).
+      lcl_conn-&gt;close( ).
+
+      EXIT.
+
+  ENDTRY.
+
+  lcl_conn-&gt;commit( ).
+  lcl_conn-&gt;close( ).
+
+ENDFORM.
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*000   & & & &</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

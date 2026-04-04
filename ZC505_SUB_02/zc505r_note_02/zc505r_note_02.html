@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_02</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_02</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Report ZC505R_NOTE_02</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_02</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_02.
+<font color ="#0000FF">**11월 24일*******************************************************************</font>
+
+DATA : gv_num1   TYPE i,
+       gv_num2   TYPE i,
+       gv_result TYPE p DECIMALS 2.
+
+CLEAR : gv_num1, gv_num2 , gv_result.
+
+gv_num1 = 124.
+gv_num2 = 35.
+MOVE 124 TO gv_num1. " 옛날 문법
+
+gv_result = gv_num1 * gv_num2 / 7.
+
+DATA : gv_acc     TYPE i,
+       gv_result2 TYPE p.
+
+CLEAR : gv_acc, gv_result2.
+
+<font color ="#0000FF">*gv_acc = gv_acc + 2.</font>
+<font color ="#0000FF">*축약</font>
+gv_acc     += 2.
+ADD 2 TO gv_acc. " 옛날 문법
+
+gv_result2 = gv_acc * 7.
+
+WRITE : gv_num1, gv_num2, gv_result, / , gv_acc, gv_result2.
+
+<font color ="#0000FF">**********************************************************************</font>
+
+<font color ="#0000FF">*bc400_s_flight 의 스트럭쳐를 그대로 가져와서 쓰겠다</font>
+
+DATA : gv_werks  TYPE werks_d, " 엘리멘탈을 직접 가져옴
+       gv_matnr  TYPE mara-matnr, "필드를 직접 가져옴
+       gs_flight TYPE bc400_s_flight, "스트럭쳐를 직접 가져옴
+       gs_mat    TYPE zc505t0018. " 테이블을 직접 가져옴
+
+gv_werks         = '1010'.
+gv_matnr         = 'ST_10'.
+
+<font color ="#0000FF">*스트럭처이기 때문에 경로 지정을 해줘야한다. 안에 필드가 많음!</font>
+
+gs_flight-carrid = 'AA'.
+gs_flight-connid = '0028'.
+gs_mat-meins     = 'EA'.
+
+<font color ="#0000FF">******실습2****************************************************************</font>
+
+<font color ="#0000FF">*17번 테이블을 참조하는 변수, DE 를 직접 참조하는 변수 선언.</font>
+DATA: gv_matnr2 TYPE zc505t0017-matnr,
+      gv_werks2 TYPE werks_d.
+
+<font color ="#0000FF">* 1번,2번에서 선언한 변수를 참조하는 변수 선언</font>
+DATA : gv_matnr3 LIKE gv_matnr2,
+       gv_werks3 LIKE gv_werks2.
+
+<font color ="#0000FF">*5. 17번 테이블을 참조하는 스트럭처</font>
+DATA gs_matnr TYPE zc505t0017.
+
+<font color ="#0000FF">*6번 5번에서 선언한 스트럭처의 mtart 필드를 참조하는 변수, 그리고 스트럭처 선언.</font>
+DATA: gv_matnr4 LIKE gs_matnr-mtart,
+      gs_matnr2 LIKE gs_matnr.
+
+<font color ="#0000FF">******실습3****************************************************************</font>
+
+DATA :gv_bukrs   TYPE bkpf-bukrs,
+      gv_belnr_d TYPE belnr_d,
+      gv_aedat   TYPE aedat_bkpf,
+      gv_data    TYPE fac_bkpf_ext_glo-glo_dat1_hd,
+      gs_werks   TYPE werks, "5번
+      gv_werks4  LIKE gs_werks-werks, "6번
+      gs_werks2  LIKE gs_werks.
+
+
+
+<font color ="#0000FF">****실습3-1******************************************************************</font>
+
+gv_bukrs   = 'ABC'.
+gv_belnr_d ='hello'.
+gv_aedat   = '20251124'.
+gv_data    = '20251125'. "4번까지
+gs_werks = 'jack'. "5번
+gv_werks4 = 'banana'. : "6번
+gs_werks2 = 'shy'. "7번
+
+<font color ="#0000FF">***실습4*******************************************************************</font>
+
+DATA :gs_delevery  TYPE zc505t0024,
+      gv_vbeln     LIKE gs_delevery-vbeln,
+      gv_vbelp     LIKE gs_delevery-vbelp,
+      gv_matnr5    LIKE gs_delevery-matnr,
+      gv_erfmg     LIKE gs_delevery-erfmg,
+      gv_wrbtr     LIKE gs_delevery-wrbtr,
+      gs_delevery2 LIKE gs_delevery.
+
+gs_delevery-vbeln = 'Hello'.
+gs_delevery-vbelp = '23'.
+gs_delevery-matnr = 'tiger'.
+gs_delevery-werks = 'AAAV'.
+gs_delevery-menge = '12354'.
+gs_delevery-erfmg = '2323'.
+gs_delevery-meins = 'USD'.
+gs_delevery-dmbtr = ''.
+gs_delevery-wrbtr = ''.
+gs_delevery-waers = ''.
+
+gv_vbeln = 'fd'.
+gv_vbelp = '38'.
+gv_matnr5 = 'dgdgf'.
+gv_erfmg = '512.2323'.
+gv_wrbtr = '4123.2323'.
+gs_delevery2  = 'hyun'.
+
+
+<font color ="#0000FF">*실습5*********************************************************************</font>
+
+DATA : gs_str_co  TYPE zc505t0025,
+       gv_kokrs   LIKE gs_str_co-korks,
+       gv_versn   LIKE gs_str_co-versn,
+       gv_bldat   LIKE gs_str_co-bldat,
+       gs_str_co2 LIKE gs_str_co,
+       gv_koks2   LIKE gv_kokrs,
+       gv_versn2  LIKE gv_versn,
+       gv_bldat2  LIKE gv_bldat.
+
+gs_str_co-korks     = 'CHAR'.
+gs_str_co-belnr     = '123456'.
+gs_str_co-buzei     = '001'.
+gs_str_co-gjahr     = '2025'.
+gs_str_co-versn     = 'AJJ'.
+gs_str_co-perab     = '002'.
+gs_str_co-perbi     = '004'.
+gs_str_co-bldat     = '20251125'.
+gs_str_co-budat     = '20205123'.
+gs_str_co-quant1    = '123453'.
+gs_str_co-qunit1    = '025'.
+gs_str_co-budget_pd = 'dddd'.
+gv_kokrs            = 'fdd'.
+gs_str_co2-budat    = '20261123'.
+
+<font color ="#0000FF">*******실습6***************************************************************</font>
+
+DATA : gs_ins   TYPE zc505t0026,
+       gs_ins2  LIKE gs_ins,
+       gv_art   TYPE zc505t0026-art,
+       gv_spe   TYPE zc505t0026-spezueber,
+       gv_conf  TYPE zc505t0026-conf,
+       gv_tls   TYPE zc505t0026-tls,
+       gv_app   TYPE zc505t0026-app,
+       gv_mer   TYPE zc505t0026-mer,
+       gv_insmk TYPE zc505t0026-insmk.
+
+DATA : gv_art2   LIKE gv_art,
+       gv_spe2   LIKE gv_spe,
+       gv_conf2  LIKE gv_conf,
+       gv_tls2   LIKE gv_tls,
+       gv_app2   LIKE gv_app,
+       gv_mer2   LIKE gv_mer,
+       gv_insmk2 LIKE gv_insmk.
+
+
+gs_ins-art    = 'APPPLE'.
+gv_spe        = 'H'.
+gv_spe2       = 'S'.
+gs_ins2-werks = 'AAA'.
+
+
+<font color ="#0000FF">*******실습7***************************************************************</font>
+
+DATA : gs_material   TYPE zc505t0027,
+       gs_material_2 LIKE gs_material,
+       gv_bwart      TYPE zc505t0027-bwart,
+       gv_matnr6     TYPE zc505t0027-matnr,
+       gv_bnbtr      TYPE zc505t0027-bnbtr,
+       gv_waers      TYPE zc505t0027-waers,
+       gv_bpmng      TYPE zc505t0027-bpmng,
+       gv_bprme      TYPE zc505t0027-bprme.
+
+DATA :gv_bwart2 LIKE gv_bwart,
+      gv_matnr7 LIKE gv_matnr6,
+      gv_bnbtr2 LIKE gv_bnbtr,
+      gv_waers2 LIKE gv_waers,
+      gv_bpmng2 LIKE gv_bpmng,
+      gv_bprme2 LIKE gv_bprme.
+
+<font color ="#0000FF">*스트럭쳐에 값 넣어주기</font>
+gs_material-matnr = 'ABC11'.
+gs_material_2-matnr = 'ART'.
+
+<font color ="#0000FF">* 변수에 값 넣기</font>
+gv_bwart = 'OOO'.
+gv_bwart2 = 'HHH'.
+
+
+<font color ="#0000FF">***** 실습3*****************************************************************</font>
+
+DATA : BEGIN OF gs_sd,
+         vbeln TYPE lips-vbeln,
+         posnr TYPE lips-posnr,
+         pstyv TYPE lips-pstyv,
+         matnr TYPE lips-matnr,
+         matwa TYPE lips-matwa,
+         matkl TYPE lips-matkl,
+       END OF gs_sd.
+DATA gt_data2 LIKE TABLE OF gs_sd.
+
+gs_sd-VBELN = '1000000001'.
+gs_sd-POSNR = 10.
+gs_sd-PSTYV = 'ADP1'.
+gs_sd-MATNR = 'T-RSP512'.
+gs_sd-MATWA = 'ST_10'.
+gs_sd-MATKL = '01'.
+
+APPEND gs_sd to  gt_data2.
+
+gs_sd-VBELN = '1000000002'.
+gs_sd-POSNR = '20'.
+gs_sd-PSTYV = 'ADP3'.
+gs_sd-MATNR = 'T-aas'.
+gs_sd-MATWA = ''.
+gs_sd-MATKL = '01'.
+
+APPEND gs_sd to  gt_data2.
+
+
+
+BREAK-POINT.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

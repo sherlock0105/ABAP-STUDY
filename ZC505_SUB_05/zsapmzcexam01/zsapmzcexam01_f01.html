@@ -1,0 +1,364 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZSAPMZCEXAM01_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZSAPMZCEXAM01_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include SAPMZCEXAM01_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          SAPMZCEXAM01_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  DATA ls_fcat TYPE lvc_s_fcat.
+
+
+  gs_layout = VALUE #(
+                        zebra      = 'X'
+                        cwidth_opt = 'A'
+                        sel_mode   = 'D'
+                        grid_title = TEXT-t01
+                        smalltitle = 'X'
+                     ).
+
+  gs_stable = VALUE #(
+                       row  = 'X'
+                       col  = 'X'
+                      ).
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'ZC505T0048'
+    CHANGING
+      ct_fieldcat      = gt_fcat.
+
+
+  LOOP AT gt_fcat ASSIGNING FIELD-SYMBOL(&lt;fs_fcat&gt;).
+
+    CASE &lt;fs_fcat&gt;-fieldname.
+
+      WHEN 'AUFNR'.       "핫스팟 (예: 생산오더 클릭)
+        &lt;fs_fcat&gt;-hotspot  = 'X'.
+        &lt;fs_fcat&gt;-coltext  = 'Production Order'.
+
+      WHEN 'ERDAT' OR 'ERZET' OR 'ERNAM' OR 'AEDAT' OR 'AEZET' OR 'AENAM'.
+        &lt;fs_fcat&gt;-no_out = 'X'.
+
+    ENDCASE.
+
+  ENDLOOP.
+
+  gt_fcat = VALUE #( BASE gt_fcat
+
+  ( key       = 'X'
+   fieldname = 'ICON'
+   coltext   = 'ICON'
+   col_pos   = 1
+   icon      = 'X')
+  ).
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      container_name = 'GCL_CONTAINER'.          " layout 커스텀 컨테이너에 적은 name을 입력
+
+  CREATE OBJECT gcl_grid
+    EXPORTING
+      i_parent = gcl_container.                  " Parent Container
+
+
+  gs_variant-report = sy-repid.
+
+  SET HANDLER : lcl_event_handler=&gt;handle_hotspot_click  FOR gcl_grid,
+                lcl_event_handler=&gt;handle_double_click   FOR gcl_grid.
+
+  CALL METHOD gcl_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant              " Layout
+      i_save          = 'A'                     " Save Layout
+      i_default       = 'X'                     " Default Display Variant
+      is_layout       = gs_layout               " Layout
+    CHANGING
+      it_outtab       = gt_data                 " Output Table
+      it_fieldcatalog = gt_fcat.                " Field Catalog
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_double_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_double_click  USING    ps_row TYPE lvc_s_row
+                                   ps_col TYPE lvc_s_col.
+
+  CHECK ps_row-rowtype IS INITIAL. " 합계/소계/헤더 행 더블클릭 방지
+
+  READ TABLE gt_data INTO gs_data INDEX ps_row-index.
+
+  CHECK sy-subrc EQ 0. " gs_data 에서 데이터를 못 읽으면 exit.
+
+  CASE ps_col-fieldname.
+
+    WHEN 'MATNR'.
+      SET PARAMETER ID 'MAT' FIELD gs_data-matnr.
+
+      CALL TRANSACTION 'MM03' AND SKIP FIRST SCREEN. "TCODE 로 이동,AND SKIP~ / ENTER 기능
+
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  SELECT aufnr, posnr, matnr, pwerk,
+         gstrp, gltrp, rsnum, gamng,
+         gmein, erdat, erzet, ernam,
+         aedat, aezet, aenam,
+         CASE
+           WHEN aufnr IS NOT INITIAL THEN '@06@'
+           ELSE @space
+         END AS icon
+    FROM zc505t0048
+    ORDER BY aufnr, posnr
+    INTO CORRESPONDING FIELDS OF TABLE @gt_data.
+
+<font color ="#0000FF">*  gt_data = CORRESPONDING #( lt_data ).</font>
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_grid . "화면을 다시 그려준다.
+
+  CALL METHOD gcl_grid-&gt;refresh_table_display
+    EXPORTING
+      is_stable      = gs_stable              " 스크롤 위치 및 커서 고정
+      i_soft_refresh = space.                 " Without Sort, Filter, etc
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_data .
+
+  _clear gs_row gt_row.
+
+  CALL METHOD gcl_grid-&gt;get_selected_rows     "어디 행을 선택했는지 봐준다.
+    IMPORTING
+      et_index_rows = gt_row.                 " Indexes of Selected Rows
+
+  IF gt_row IS INITIAL.
+    MESSAGE s000 WITH 'First, select row'. "GT_ROW 가 선택하지 않고 DISPLAY 눌렀을때 안내 메세지 및 EXIT
+    EXIT.
+  ENDIF.
+
+  IF lines( gt_row ) &gt; 1. "다중 행 선택 후 display를 막아준다.
+    MESSAGE s000 WITH 'Please select a one row.'.
+    EXIT.
+  ENDIF.
+
+  READ TABLE gt_row INTO gs_row INDEX 1.     "READ TABLE 로 한행만 가져온다.
+
+  CHECK sy-subrc EQ 0.    "sy-subrc 가 0 아 아니면 아래 로직 수행하지 않는다.
+
+  READ TABLE gt_data INTO gs_data INDEX gs_row-index.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form save_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM save_data .
+
+  DATA : ls_save TYPE zc505t0048.
+
+  IF gs_data-aufnr IS INITIAL OR
+     gs_data-posnr IS INITIAL. "KEY 값이 없으면 EXIT.
+
+    MESSAGE s000 WITH 'Input key field'
+    DISPLAY LIKE 'E'.
+
+    EXIT.
+
+  ENDIF.
+
+  IF gs_data-gamng IS NOT INITIAL. "수량이 입력이 되어있는데 단위가 없으면 EXIT 처리 후 안내 메세지.
+
+    IF gs_data-gmein IS INITIAL.
+
+      MESSAGE s000 WITH '단위를 입력하세요' DISPLAY LIKE 'E'.
+      EXIT.
+
+    ENDIF.
+
+  ENDIF.
+
+  MOVE-CORRESPONDING gs_data TO ls_save.
+
+  IF ls_save-erdat IS INITIAL.         "신규 데이터인 경우
+
+    ls_save-erdat = sy-datum.          "생성일
+    ls_save-erzet = sy-uzeit.          "생성시간
+    ls_save-ernam = sy-uname.          "생성자
+
+  ELSE.                                "기존 데이터인 경우
+
+    ls_save-aedat = sy-datum.          "변경일
+    ls_save-aezet = sy-uzeit.          "변경시간
+    ls_save-aenam = sy-uname.          "변경자
+
+  ENDIF.
+
+  MODIFY zc505t0048 FROM ls_save.  "DB 테이블에 반영 (Insert or Update)
+
+  IF sy-dbcnt &gt; 0.                "변경이 일어나면 commit 아니면 rollback
+
+    COMMIT WORK AND WAIT.
+    PERFORM get_data.              "DB 불러오기
+    PERFORM refresh_grid.          "화면 재갱신
+
+    MESSAGE s002.                  "Data was saved successfully
+
+  ELSE.
+
+    ROLLBACK WORK.                 "아닐 시 ROLLBACK , 에러메세지 표시
+    MESSAGE s004 DISPLAY LIKE 'E'. "Data save failed
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form clear_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM clear_data .
+
+  CLEAR gs_data.    "화면 상에 올려진건 gs_data이기 때문에 clear로 해결
+
+  MESSAGE s000 WITH 'Clear successfully'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form delete_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM delete_data .
+
+  IF gs_data-aufnr IS INITIAL OR "PK 를 사용하여 DELETE 를 해준다.
+     gs_data-posnr IS INITIAL.   "AUFNR 또는 POSNR 이 초기값이면 EXIT.
+
+    MESSAGE s000 WITH 'Required key field'
+    DISPLAY LIKE 'E'.
+
+    EXIT.
+
+  ENDIF.
+
+  DELETE FROM zc505t0048
+   WHERE aufnr EQ gs_data-aufnr   "KEY 값을 이용해서 DELETE
+     AND posnr EQ gs_data-posnr.
+
+  IF sy-subrc EQ 0.     "sy-subrc 가 0이면 commit 아니면 rollback
+
+    COMMIT WORK AND WAIT.
+    MESSAGE s003.          "Data was deleted successfully
+    PERFORM get_data.      "DB를 받아온다.
+    PERFORM refresh_grid.  "화면 갱신
+
+  ELSE.
+
+    ROLLBACK WORK.
+    MESSAGE s005 DISPLAY LIKE 'E'. "Data deletion failed
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_hotspot_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW_ID</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN_ID</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_hotspot_click  USING    ps_row TYPE lvc_s_row
+                                    ps_col TYPE lvc_s_col.
+
+  CHECK ps_row-rowtype IS INITIAL. " 합계/소계/헤더 행 클릭 방지. " 초기값이면 아래를 통과하지 않고 로직을 벗어난다.
+
+  DATA(ls_data) = VALUE #( gt_data[ ps_row-index ] OPTIONAL ). "read table gt_data into gs_data index ps_row-index.
+
+  CHECK ps_col-fieldname EQ 'AUFNR'.
+
+  CASE ps_col-fieldname.
+
+    WHEN 'AUFNR'.         "AUFNR 필드 클릭시
+
+      SET PARAMETER ID 'ANR' FIELD ls_data-aufnr.    "PARAMETER 세팅
+
+      CALL TRANSACTION 'CO03' AND SKIP FIRST SCREEN. "CO03 조회
+
+  ENDCASE.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

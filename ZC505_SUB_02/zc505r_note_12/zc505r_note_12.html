@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_12</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_12</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Program ZC505R_NOTE_12</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_12</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_12 MESSAGE-ID zc505m.
+
+<font color ="#0000FF">**********************************************************************</font>
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-001.
+
+  PARAMETERS : pa_carr  TYPE sflight-carrid DEFAULT 'QA',  " DEFAULT로 기본값을 설정
+               pa_check AS CHECKBOX DEFAULT 'X'. "체크박스 구분 X
+
+  SELECTION-SCREEN ULINE. "줄 긋기
+
+  PARAMETERS : pa_rb1 RADIOBUTTON GROUP rb1, "라디오 그룹은 2개 이상부터 설정해야함.
+               pa_rb2 RADIOBUTTON GROUP rb1 DEFAULT 'X', "DEFAULT 값 설정
+               pa_rb3 RADIOBUTTON GROUP rb1.
+
+  SELECTION-SCREEN SKIP.
+
+  PARAMETERS : pa_bt1 RADIOBUTTON GROUP rb2,
+               pa_bt2 RADIOBUTTON GROUP rb2 DEFAULT 'X'.
+
+  SELECTION-SCREEN ULINE.
+
+  PARAMETERS : pa_air  TYPE scarr-carrid AS LISTBOX VISIBLE LENGTH 40, "보여지는 길이를 설정할 수 있음, 서치 헬프가 있어서 나옴.
+               pa_area TYPE zc505de_area AS LISTBOX VISIBLE LENGTH 15
+               OBLIGATORY DEFAULT 'DAEJEON'. "엘리멘트를 직접 입력 OBLIGATORY 했을 때 DEFAULT 값을 넣어주는게 좋다.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+<font color ="#0000FF">**********************************************************************</font>
+
+<font color ="#0000FF">* Check 박스 사용 예시</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*IF pa_check = 'X'.</font>
+<font color ="#0000FF">*IF pa_check EQ 'X'.</font>
+<font color ="#0000FF">*IF pa_check NE space.</font>
+IF pa_check IS NOT INITIAL.
+
+
+ENDIF.
+
+<font color ="#0000FF">*Check 박스가 여러개 있는 경우</font>
+<font color ="#0000FF">*IF 문 사용</font>
+
+<font color ="#0000FF">*CASE 'X'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  WHEN pa_check1 OR pa_check2.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  WHEN pa_check3 OR pa_check4.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  WHEN pa_check5.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*ENDCASE.</font>
+
+<font color ="#0000FF">*Radio 사용 예시</font>
+<font color ="#0000FF">*라디오 버튼은 특이사항 없는 이상 CASE 를 주로 사용한다.</font>
+CASE 'X'.
+  WHEN pa_rb1.
+  WHEN pa_rb2.
+  WHEN pa_rb3.
+ENDCASE.
+
+CASE 'X'.
+  WHEN pa_bt1.
+
+  WHEN OTHERS.
+ENDCASE.
+
+WRITE : 'PA_CHECK :', pa_check,/,
+        'PA_RB1   :', pa_rb1, /,
+        'PA_RB2   :', pa_rb2, /,
+        'PA_RB3   :', pa_rb3, /,
+        'PA_BT1   :', pa_bt1, /,
+        'PA_BT2   :', pa_bt2, /,
+        'PA_AIR   :', pa_air,	/,
+        'PA_AREA  :', pa_area,/.
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* 001 Selection Condition</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

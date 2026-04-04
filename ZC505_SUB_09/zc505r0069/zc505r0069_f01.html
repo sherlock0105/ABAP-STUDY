@@ -1,0 +1,295 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0069_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0069_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0069_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZC505R0069_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_param</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_param .
+
+  pa_buk = '0001'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_purchase .
+<font color ="#0000FF">*</font>
+  SELECT *
+      INTO CORRESPONDING FIELDS OF TABLE @gt_ekko
+    FROM zc505cds0015( p_bukrs = @pa_buk )
+   ORDER BY ebeln, ebelp.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout = VALUE #(
+                    zebra      = 'X'
+                    cwidth_opt = 'A'
+                    sel_mode   = 'D'
+                    ).
+
+  gs_stable = VALUE #(
+                      row = 'X'
+                      col = 'X'
+                      ).
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout_1</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout_1 .
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'ZC505CDSV0015'
+    CHANGING
+      ct_fieldcat      = gt_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen_1</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen_1 .
+
+  CREATE OBJECT gcl_container_1
+    EXPORTING
+      container_name = 'GCL_CONTAINER_1'.
+
+  CREATE OBJECT gcl_grid_1
+    EXPORTING
+      i_parent = gcl_container_1.
+
+  gs_variant-report  = sy-repid.
+  gs_variant-handle = 'A1'.
+
+  CALL METHOD gcl_grid_1-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant                 " Layout
+      i_save          = 'A'                 " Save Layout
+      i_default       = 'X'              " Default Display Variant
+      is_layout       = gs_layout                " Layout
+    CHANGING
+      it_outtab       = gt_ekko               " Output Table
+      it_fieldcatalog = gt_fcat.                 " Field Catalog
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_product .
+  REFRESH : gt_product.
+
+  DATA : lcl_connection TYPE REF TO cl_sql_connection,
+         lcl_statement  TYPE REF TO cl_sql_statement,
+         lcl_result     TYPE REF TO cl_sql_result_set,
+         lr_data        TYPE REF TO data,
+         lr_param       TYPE REF TO data,
+         lv_sql         TYPE string,
+         lx_sql_except  TYPE REF TO cx_root,
+         lv_msg         TYPE string.
+
+  TRY.
+
+      lcl_connection = cl_sql_connection=&gt;get_connection( ).
+
+      CREATE OBJECT lcl_statement
+        EXPORTING
+          con_ref = lcl_connection.
+
+      lv_sql = | SELECT a.AUFNR, a.AUART, a.BUKRS, a.WERKS, c.MATNR,         |
+            && |        b.GSTRP, c.POSNR, b.GLTRP, b.RSNUM, c.PSMNG, c.AMEIN |
+            && |   FROM AUFK AS a                                            |
+            && |  INNER JOIN afko as b                                       |
+            && |  on a.aufnr = b.aufnr                                       |
+            && |  INNER JOIN afpo as c                                       |
+            && |  on a.aufnr = c.aufnr                                       |
+            && |  WHERE a.MANDT = ?                                          | "? 은 파라미터 자리가 된다.
+            && |    AND a.BUKRS = ?                                          | .
+
+      "동적 할당이 가능하다. placeholder,
+      GET REFERENCE OF sy-mandt INTO lr_param. "lr_parma 이 mandt 포인터, 그래서 set+
+      lcl_statement-&gt;set_param( lr_param ). "첫번째 파마리터 자리에 넣어준다.
+
+      GET REFERENCE OF pa_buk INTO lr_param.
+      lcl_statement-&gt;set_param( lr_param ).
+       "받아올 장소를 저장한다.
+      lcl_result = lcl_statement-&gt;execute_query( lv_sql ).
+      "lr_data, 메모리 주소 공유, 저장된 데이터만 뽑아서 온다. get_refrence /  set_parameter 가 끌어와준다.
+      GET REFERENCE OF gt_product INTO lr_data.
+
+      lcl_result-&gt;set_param_table( lr_data ).
+      lcl_result-&gt;next_package( ).
+
+      lcl_result-&gt;close( ).
+
+    CATCH cx_sql_exception INTO lx_sql_except.
+
+      lv_msg = lx_sql_except-&gt;get_text( ).
+
+      IF lcl_connection IS BOUND.
+        TRY.
+            lcl_connection-&gt;close( ).
+          CATCH cx_sql_exception.
+
+        ENDTRY.
+      ENDIF.
+
+      MESSAGE s000 WITH lv_msg DISPLAY LIKE 'E'.
+      EXIT.
+
+  ENDTRY.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout_2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout_2 .
+
+  PERFORM make_fcat_product USING :
+        'X'  'AUFNR'  ''  'AUFK'  '',
+        ' '  'AUART'  ''  'AUFK'  '',
+        ' '  'BUKRS'  ''  'AUFK'  '',
+        ' '  'WERKS'  ''  'AUFK'  '',
+        ' '  'MATNR'  ''  'AFPO'  '',
+        ' '  'GSTRP'  ''  'AFKO'  '',
+        ' '  'POSNR'  ''  'AFPO'  '',
+        ' '  'GLTRP'  ''  'AFKO'  '',
+        ' '  'RSNUM'  ''  'AFKO'  '',
+        ' '  'PSMNG'  ''  'AFPO'  '',
+        ' '  'AMEIN'  ''  'AFPO'  ''.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen_2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen_2 .
+
+  CREATE OBJECT gcl_container_2
+    EXPORTING
+      container_name = 'GCL_CONTAINER_2'.
+
+  CREATE OBJECT gcl_grid_2
+    EXPORTING
+      i_parent = gcl_container_2.
+
+  gs_variant-report  = sy-repid.
+  gs_variant-handle = 'A2'.
+
+  CALL METHOD gcl_grid_2-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant                 " Layout
+      i_save          = 'A'                 " Save Layout
+      i_default       = 'X'              " Default Display Variant
+      is_layout       = gs_layout                " Layout
+    CHANGING
+      it_outtab       = gt_product              " Output Table
+      it_fieldcatalog = gt_fcat.                 " Field Catalog
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data.
+
+  PERFORM get_purchase.
+  PERFORM get_product.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat_product</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat_product  USING pv_key
+                              pv_field
+                              pv_text
+                              pv_ref_table
+                              pv_ref_field.
+
+  gs_fcat-key       = pv_key.
+  gs_fcat-fieldname = pv_field.
+  gs_fcat-coltext   = pv_text.
+  gs_fcat-ref_table = pv_ref_table.
+  gs_fcat-ref_field = pv_ref_field.
+
+  CASE gs_fcat-fieldname.
+    WHEN 'PSMNG'.
+      gs_fcat-qfieldname = 'AMEINS'.
+  ENDCASE.
+
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR  gs_fcat.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

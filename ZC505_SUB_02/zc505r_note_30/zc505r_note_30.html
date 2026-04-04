@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_30</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_30</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  12월 10일</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_30</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_30 MESSAGE-ID zc505m.
+
+<font color ="#0000FF">*ZC505V0029</font>
+
+TABLES : sflight.
+
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-t01.
+
+  PARAMETERS : pa_carr TYPE sflight-carrid OBLIGATORY DEFAULT 'LH'.
+  SELECT-OPTIONS : so_con FOR sflight-connid OBLIGATORY.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+DATA : BEGIN OF gs_sflight,
+         carrid     TYPE sflight-carrid,
+         carrname   TYPE zc505v0029-carrname,
+         connid     TYPE sflight-connid,
+         fldate     TYPE sflight-fldate,
+         cityfrom   TYPE zc505v0029-cityfrom,
+         cityto     TYPE zc505v0029-cityto,
+         planetype  TYPE sflight-planetype,
+         seatsmax_b TYPE sflight-seatsmax_b,
+         url        TYPE zc505v0029-url,
+       END OF gs_sflight,
+
+       gt_sflight LIKE TABLE OF gs_sflight,
+
+       BEGIN OF gs_sflight2,
+         carrid     TYPE sflight-carrid,
+         connid     TYPE sflight-connid,
+         fldate     TYPE sflight-fldate,
+         cityfrom   TYPE zc505v0029-cityfrom,
+         cityto     TYPE zc505v0029-cityto,
+         planetype  TYPE sflight-planetype,
+         seatsmax_b TYPE sflight-seatsmax_b,
+       END OF gs_sflight2,
+
+       gt_sflight2 LIKE TABLE OF gs_sflight2.
+
+CLEAR   : gs_sflight, gs_sflight2.
+REFRESH : gt_sflight, gt_sflight2.
+
+SELECT a~carrid a~connid a~fldate a~planetype a~seatsmax_b
+       b~carrname b~cityfrom b~cityto b~url
+  INTO CORRESPONDING FIELDS OF TABLE gt_sflight
+  FROM sflight AS a
+  INNER JOIN zc505v0029 AS b
+  ON a~carrid    EQ b~carrid
+  AND a~connid   EQ b~connid
+  WHERE a~carrid EQ pa_carr
+  AND  a~connid  IN so_con.
+<font color ="#0000FF">*from 절에 뷰가 오는게 맞음.</font>
+
+IF sy-subrc NE 0.
+  MESSAGE s001.
+  STOP.
+ENDIF.
+
+LOOP AT gt_sflight INTO gs_sflight.
+
+  CASE gs_sflight-seatsmax_b.
+
+    WHEN '30'.
+      gs_sflight-planetype = '747-400'.
+    WHEN '21'.
+      gs_sflight-planetype = 'A340-600'.
+    WHEN OTHERS.
+      CLEAR : gs_sflight-planetype.
+  ENDCASE.
+
+  MOVE-CORRESPONDING gs_sflight TO gs_sflight2.
+  APPEND gs_sflight2 TO  gt_sflight2.
+
+  CLEAR gs_sflight2.
+
+ENDLOOP.
+
+cl_demo_output=&gt;display( gt_sflight2 ).
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T01 Selection Condition</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_CARR D       .</font>
+<font color ="#0000FF">* SO_CON D       .</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

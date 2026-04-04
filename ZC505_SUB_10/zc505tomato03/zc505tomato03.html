@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505TOMATO03</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505TOMATO03</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [C5] Cost Center Information</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505TOMATO03</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+
+include <a href ="zc505tomato03_top.html">zc505tomato03_top</a>.    " Global Data
+
+include <a href ="zc505tomato03_s01.html">zc505tomato03_s01</a>.  " PBO-Modules
+include <a href ="zc505tomato03_c01.html">zc505tomato03_c01</a>.  " PBO-Modules
+include <a href ="zc505tomato03_o01.html">zc505tomato03_o01</a>.  " PBO-Modules
+include <a href ="zc505tomato03_i01.html">zc505tomato03_i01</a>.  " PAI-Modules
+include <a href ="zc505tomato03_f01.html">zc505tomato03_f01</a>.  " FORM-Routines
+
+INITIALIZATION.
+  PERFORM set_parm. "gt_cost / gt_company
+
+AT SELECTION-SCREEN ON : pa_kokrs. "gt_cost
+  PERFORM check_param.
+
+AT SELECTION-SCREEN ON : pa_bukrs, pa_gjahr. " gt_company
+  PERFORM check_param2.
+
+AT SELECTION-SCREEN OUTPUT." gt_company
+  PERFORM block_param.
+
+START-OF-SELECTION.
+  PERFORM get_data.   "gt_cost
+  PERFORM set_style.  "gt_cost
+
+  PERFORM get_data_2. "gt_company
+
+  CALL SCREEN '0100'.
+
+<font color ="#0000FF">*GUI Texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T0100 --&gt; [C5] 시험 문제 연습</font>
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T01 Selection Condition</font>
+<font color ="#0000FF">* T02 Selection company lnfo</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_BUKRS D       .</font>
+<font color ="#0000FF">* PA_GJAHR D       .</font>
+<font color ="#0000FF">* PA_KOKRS D       .</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*000   & & & &</font>
+<font color ="#0000FF">*002   Data was saved successfully</font>
+<font color ="#0000FF">*003   Data was deleted successfully</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

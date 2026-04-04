@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_13_P</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_13_P</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Program ZC505R_NOTE_13_P</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_13_P</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_13_p MESSAGE-ID zc505m.
+<font color ="#0000FF">*ZRTEXTN80</font>
+
+TABLES : zmeal.
+
+DATA : BEGIN OF ls_zmeal,
+         carrid     TYPE zmeal-carrid,
+         mealnumber TYPE zmeal-mealnumber,
+         mealtype   TYPE zmeal-mealtype,
+         text       TYPE zmealt-text,
+       END OF ls_zmeal,
+       lt_zmeal  LIKE TABLE OF ls_zmeal,
+       lv_carrid TYPE zmeal-carrid.
+
+<font color ="#0000FF">*청소</font>
+
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK bl2 WITH FRAME TITLE TEXT-t01.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  PARAMETERS : pa_meal TYPE zmeal-mealnumber DEFAULT '00000001'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK bl2.</font>
+
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK bl3 WITH FRAME TITLE TEXT-t01.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  SELECT-OPTIONS : so_meal FOR zmeal-mealnumber NO INTERVALS NO-EXTENSION.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK bl3.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECT a~carrid a~mealnumber a~mealtype</font>
+<font color ="#0000FF">*       b~text</font>
+<font color ="#0000FF">*  INTO CORRESPONDING FIELDS OF TABLE lt_zmeal</font>
+<font color ="#0000FF">*  FROM zmeal AS a</font>
+<font color ="#0000FF">*  LEFT OUTER JOIN zmealt AS b</font>
+<font color ="#0000FF">*    ON a~carrid EQ b~carrid</font>
+<font color ="#0000FF">*   AND a~mealnumber EQ b~mealnumber</font>
+<font color ="#0000FF">*   AND  b~sprache EQ sy-langu</font>
+<font color ="#0000FF">* WHERE a~mealnumber IN so_meal.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*IF sy-subrc NE space.</font>
+<font color ="#0000FF">*  MESSAGE s001 DISPLAY LIKE 'E'.</font>
+<font color ="#0000FF">*  STOP.</font>
+<font color ="#0000FF">*ENDIF.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECT carrid mealnumber mealtype</font>
+<font color ="#0000FF">*  INTO CORRESPONDING FIELDS OF TABLE lt_zmeal</font>
+<font color ="#0000FF">*  FROM zmeal</font>
+<font color ="#0000FF">*  WHERE mealnumber EQ pa_meal.</font>
+
+
+
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-t01.
+
+  PARAMETERS : pa_zm1 RADIOBUTTON GROUP rb1,
+               pa_zm2 RADIOBUTTON GROUP rb1,
+               pa_zm3 RADIOBUTTON GROUP rb1.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+CASE 'X'.
+  WHEN pa_zm1.
+    lv_carrid = 'AA'.
+  WHEN pa_zm2.
+    lv_carrid = 'AB'.
+  WHEN pa_zm3.
+    lv_carrid = 'AC'.
+ENDCASE.
+
+SELECT a~carrid a~mealnumber a~mealtype
+       b~text
+ INTO CORRESPONDING FIELDS OF TABLE lt_zmeal
+ FROM zmeal AS a
+ LEFT OUTER JOIN zmealt AS b
+   ON a~carrid EQ b~carrid
+  AND b~mealnumber EQ b~mealnumber
+  AND b~sprache EQ sy-langu
+WHERE a~carrid EQ lv_carrid.
+
+IF sy-subrc NE space.
+  "데이터가 없는데도 조회되는게 싫음. 아래 로직을 타지 않게 STOP 을 적어준다.
+  "내가 조회하는 데이터가 없을때!.
+  MESSAGE s001.
+  STOP.
+ENDIF.
+
+cl_demo_output=&gt;display( lt_zmeal ).
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T01  Fight Meal</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_MEAL         음식 번호</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

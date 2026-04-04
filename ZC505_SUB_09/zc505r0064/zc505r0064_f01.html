@@ -1,0 +1,217 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0064_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0064_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0064_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZC505R0064_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  SELECT *
+     INTO CORRESPONDING FIELDS OF TABLE @gt_data
+     FROM zc505cds0004
+    WHERE carrid EQ @pa_car
+      AND connid EQ @pa_con
+      AND fldate EQ @pa_fld.
+
+  IF sy-subrc NE 0.
+    MESSAGE s001.
+    LEAVE LIST-PROCESSING.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_para</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_para .
+  "필수 입력이라 DEFAULT 값 설정
+  pa_car = 'AA'.
+  pa_con = '0017'.
+  pa_fld = '20250731'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout-zebra      = 'X'.
+  gs_layout-cwidth_opt = 'A'.
+  gs_layout-sel_mode   = 'D'.
+
+  gs_stable-row = 'X'.
+  gs_stable-col = 'X'.
+
+  PERFORM make_fcat USING :
+      'X'  'STATUS'   'STATUS' 'ZC505CDS0004' ' ' ,
+      'X'  'CARRID'   ' ' 'ZC505CDS0004' ' ' ,
+      'X'  'CONNID'   ' ' 'ZC505CDS0004' ' ' ,
+      'X'  'FLDATE'   ' ' 'ZC505CDS0004' ' ' ,
+      'X'  'BOOKID'   ' ' 'ZC505CDS0004' ' ' ,
+      ' '  'CARRNAME' ' ' 'ZC505CDS0004' ' ' ,
+      ' '  'CITYFROM' ' ' 'ZC505CDS0004' ' ' ,
+      ' '  'CITYTO' ' ' 'ZC505CDS0004' ' ' ,
+      ' '  'PRICE' ' ' 'ZC505CDS0004' ' ' ,
+      ' '  'CURRCODE ' ' ' 'ZC505CDS0004' ' ' ,
+      ' '  'SMOKER' ' ' 'ZC505CDS0004' ' ' ,
+      ' '  'LUGGWEIGHT' ' ' 'ZC505CDS0004' ' ' ,
+      ' '  'WUNIT' ' ' 'ZC505CDS0004' ' ' ,
+      ' '  'FORCURKEY' ' ' 'ZC505CDS0004' ' ' .
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat  USING   pv_key
+                        pv_field
+                        pv_text
+                        pv_ref_table
+                        pv_ref_field.
+
+  gs_fcat-key       = pv_key.
+  gs_fcat-fieldname = pv_field.
+  gs_fcat-coltext   = pv_text.
+  gs_fcat-ref_table = pv_ref_table.
+  gs_fcat-ref_field = pv_ref_field.
+
+  CASE pv_field.
+
+    WHEN 'PRICE'.
+      gs_fcat-cfieldname = 'CURRCODE'.
+    WHEN 'FORCURAM'.
+      gs_fcat-cfieldname = 'FORCURKEY'.
+    WHEN 'LUGGWEIGHT'.
+      gs_fcat-qfieldname = 'WUNIT'.
+    WHEN 'SMOKER'.
+      gs_fcat-checkbox = 'X'.
+    WHEN 'STATUS'.
+      gs_fcat-icon = 'X'.
+  ENDCASE.
+
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR  gs_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      side      = gcl_container-&gt;dock_at_left " Side to Which Control is Docked
+      extension = 5000.                       " Control Extension
+
+  CREATE OBJECT gcl_grid
+    EXPORTING
+      i_parent = gcl_container.
+
+  gs_variant-report = sy-repid.
+
+  CALL METHOD gcl_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant       " Layout
+      i_save          = 'A'              " Save Layout
+      i_default       = 'X'              " Default Display Variant
+      is_layout       = gs_layout        " Layout
+    CHANGING
+      it_outtab       = gt_data           " Output Table
+      it_fieldcatalog = gt_fcat.         " Field Catalog
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout2 .
+
+  gs_layout-zebra      = 'X'.
+  gs_layout-cwidth_opt = 'A'.
+  gs_layout-sel_mode   = 'D'.
+
+  gs_stable-row = 'X'.
+  gs_stable-col = 'X'.
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'ZC505CDS0004'
+    CHANGING
+      ct_fieldcat      = gt_fcat.
+
+  DELETE gt_fcat INDEX 1.
+
+  LOOP AT gt_fcat ASSIGNING FIELD-SYMBOL(&lt;fs_fcat&gt;).
+
+    CASE &lt;fs_fcat&gt;-fieldname.
+
+      WHEN 'STATUS'.
+        &lt;fs_fcat&gt;-key  = 'X'.
+        &lt;fs_fcat&gt;-icon = 'X'.
+        &lt;fs_fcat&gt;-coltext = 'STATUS'.
+        &lt;fs_fcat&gt;-col_pos = 1.
+
+      WHEN 'CARRID' OR 'CONNID' OR 'FLDATE' OR 'BOOKID'.
+        &lt;fs_fcat&gt;-key = 'X'.
+
+<font color ="#0000FF">*      WHEN 'PRICE'.</font>
+<font color ="#0000FF">*        &lt;fs_fcat&gt;-cfieldname = 'CURRCODE'.</font>
+
+<font color ="#0000FF">*      WHEN 'LUGGWEIGHT'.</font>
+<font color ="#0000FF">*        &lt;fs_fcat&gt;-qfieldname = 'WUNIT'.</font>
+
+      WHEN 'SMOKER'.
+        &lt;fs_fcat&gt;-checkbox = 'X'.
+
+    ENDCASE.
+
+  ENDLOOP.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

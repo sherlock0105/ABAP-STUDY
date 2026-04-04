@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0028_TOP</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0028_TOP</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0028_TOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include ZC505R0028_TOP                           - Report ZC505R0028</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r0028 MESSAGE-ID zc505m.
+
+
+DATA : BEGIN OF gs_data,
+         status  TYPE icon_d.
+         INCLUDE STRUCTURE : zc505s0013.
+DATA : color TYPE lvc_t_scol,
+       END OF gs_data,
+       gt_data LIKE TABLE OF gs_data,
+
+       gv_okcode TYPE sy-ucomm.
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*DATA : BEGIN OF gs_data,</font>
+<font color ="#0000FF">*         status       TYPE icon_d,</font>
+<font color ="#0000FF">*         aufnr        TYPE afko-aufnr,</font>
+<font color ="#0000FF">*         posnr        TYPE afpo-posnr,</font>
+<font color ="#0000FF">*         gstrp        TYPE afko-gstrp,</font>
+<font color ="#0000FF">*         gltrp        TYPE afko-gltrp,</font>
+<font color ="#0000FF">*         plnbez       TYPE afko-plnbez,</font>
+<font color ="#0000FF">*         plnbez_maktx TYPE makt-maktx,</font>
+<font color ="#0000FF">*         gamng        TYPE afko-gamng, "QUAN</font>
+<font color ="#0000FF">*         gmein        TYPE afko-gmein, "UNIT</font>
+<font color ="#0000FF">*         matnr        TYPE afpo-matnr,</font>
+<font color ="#0000FF">*         matnr_maktx  TYPE makt-maktx,</font>
+<font color ="#0000FF">*         psmng        TYPE afpo-psmng, "QUAN</font>
+<font color ="#0000FF">*         amein        TYPE afpo-amein, "UNIT</font>
+<font color ="#0000FF">*         bwtar        TYPE afpo-bwtar,</font>
+<font color ="#0000FF">*         color        TYPE lvc_t_scol, "color</font>
+<font color ="#0000FF">*       END OF gs_data,</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*       gt_data   LIKE TABLE OF gs_data,</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*       gv_okcode TYPE sy-ucomm.</font>
+<font color ="#0000FF">**********************************************************************</font>
+DATA : gcl_container TYPE REF TO cl_gui_docking_container, "ALV가 들어갈 그릇 생성
+       gcl_grid      TYPE REF TO cl_gui_alv_grid, "데이터 ALV 구조
+       gs_fcat       TYPE lvc_s_fcat, "필드 카탈로그 구조
+       gt_fcat       TYPE lvc_t_fcat, "필드 카탈로그 테이블
+       gs_variant    TYPE disvariant, " 화면 레이아웃 저장 가능
+       gs_layout     TYPE lvc_s_layo, " alv 전체 화면 레이아웃 설정
+       gs_stable     TYPE lvc_s_stbl, " REFRESH 시 스크롤/선택 위치 유지
+       gs_sort       TYPE lvc_s_sort, " 기본 정렬
+       gt_sort       TYPE lvc_t_sort.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

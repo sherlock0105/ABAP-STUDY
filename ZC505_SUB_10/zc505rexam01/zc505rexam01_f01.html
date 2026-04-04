@@ -1,0 +1,644 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505REXAM01_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505REXAM01_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505REXAM01_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZC505REXAM01_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_parm</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_parm .
+
+  pa_werks = '0001'. "pa_werks 의 default 값
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  _clear gs_mat gt_mat.               "DB 를 받기 전 gs_mat gt_mat clear
+
+  REFRESH gt_mat_del.                 "사용자가 삭제했다가 SAVE 전에 REFRESH 를 하면 삭제 후보 테이블을 비워줘야한다.
+
+  CASE 'X'.                           "RADIO 버튼이 눌러졌을때 'X'. 밑에 로직 수행
+
+    WHEN rb_fun.                      "function 을 통한 db 불러오기
+      PERFORM get_data_function.
+
+    WHEN rb_mth.                      "method 로 db 불러오기
+      PERFORM get_data_method.
+
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout = VALUE #(
+                zebra      = 'X'
+                cwidth_opt = 'A'
+                sel_mode   = 'B'
+                grid_title = TEXT-t02 "Bill Of Materials Master
+                smalltitle = 'X'
+                stylefname = 'STYLE'
+                     ).
+
+  gs_stable = VALUE #(
+                row = 'X'
+                col = 'X'
+                     ).
+
+<font color ="#0000FF">*  gs_layout-zebra      = 'X'.      "줄무늬 표시</font>
+<font color ="#0000FF">*  gs_layout-cwidth_opt = 'A'.      "컬럼 폭 자동 조절</font>
+<font color ="#0000FF">*  gs_layout-sel_mode   = 'D'.      "다중 행 선택</font>
+<font color ="#0000FF">*  gs_layout-grid_title = TEXT-t02. "Bill Of Materials Master</font>
+<font color ="#0000FF">*  gs_layout-smalltitle = 'X'.      "grid_titl 작게</font>
+<font color ="#0000FF">*  gs_layout-stylefname = 'STYLE'.  "셀의 활성화/비활성화 상태 필드명 지정</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  gs_stable-row = 'X'.             "새로고침 시 스크롤/커서 유지 설정</font>
+<font color ="#0000FF">*  gs_stable-col = 'X'.</font>
+
+  PERFORM make_fcat USING :
+     'X' 'MATNR'       ' ' 'ZC505T0047'  ' ' 'X', "KEY
+     'X' 'WERKS'       ' ' 'ZC505T0047'  ' ' ' ', "KEY
+     'X' 'STLAN'       ' ' 'ZC505T0047'  ' ' 'X', "KEY
+     'X' 'STLNR'       ' ' 'ZC505T0047'  ' ' 'X', "KEY
+     'X' 'STLAL'       ' ' 'ZC505T0047'  ' ' 'X', "KEY
+     ' ' 'LOSBS'       ' ' 'ZC505T0047'  ' ' 'X', "QUAN
+     ' ' 'LOSVN'       ' ' 'ZC505T0047'  ' ' 'X', "QUAN
+     ' ' 'BMEIN'       ' ' 'ZC505T0047'  ' ' 'X'. "UNIT
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat  USING   pv_key
+                        pv_field
+                        pv_text
+                        pv_ref_table
+                        pv_ref_field
+                        pv_edit.
+
+  gs_fcat = VALUE #(
+            key       = pv_key
+            fieldname = pv_field
+            coltext   = pv_text
+            ref_table = pv_ref_table
+            ref_field = pv_ref_field
+            edit      = pv_edit
+                   ).
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  gs_fcat-key       = pv_key.       "컬럼 고정 key</font>
+<font color ="#0000FF">*  gs_fcat-fieldname = pv_field.     "itab 의 필드명</font>
+<font color ="#0000FF">*  gs_fcat-coltext   = pv_text.      "화면에 보일 컬러명</font>
+<font color ="#0000FF">*  gs_fcat-ref_table = pv_ref_table. "참조 테이블</font>
+<font color ="#0000FF">*  gs_fcat-ref_field = pv_ref_field. "참조 필드</font>
+<font color ="#0000FF">*  gs_fcat-edit      = pv_edit.      "수정 가능 여부 -&gt; X 가 수정 가능</font>
+
+  CASE pv_field.  "필드별 제어
+
+    WHEN 'LOSBS' OR 'LOSVN'. "LOSBS 와 LOSVN 필드에 UNIT 연결
+      gs_fcat-qfieldname = 'BMEIN'.
+
+  ENDCASE.
+
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR  gs_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form exclude_toolbar</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM exclude_toolbar .
+
+<font color ="#0000FF">*  APPEND : cl_gui_alv_grid=&gt;mc_fc_loc_undo       TO gt_exclude, "DUNO 제거</font>
+<font color ="#0000FF">*           cl_gui_alv_grid=&gt;mc_fc_loc_cut        TO gt_exclude, "CUT</font>
+<font color ="#0000FF">*           cl_gui_alv_grid=&gt;mc_mb_paste          TO gt_exclude, "PASTE</font>
+<font color ="#0000FF">*           cl_gui_alv_grid=&gt;mc_fc_loc_copy_row   TO gt_exclude, "COPY_ROW</font>
+<font color ="#0000FF">*           cl_gui_alv_grid=&gt;mc_fc_loc_append_row TO gt_exclude, "APPNED_ROW</font>
+<font color ="#0000FF">*           cl_gui_alv_grid=&gt;mc_fc_loc_delete_row TO gt_exclude, "DELETE_ROW</font>
+<font color ="#0000FF">*           cl_gui_alv_grid=&gt;mc_fc_loc_insert_row TO gt_exclude. "INSERT_ROW</font>
+
+  gt_exclude = VALUE #(
+                           ( cl_gui_alv_grid=&gt;mc_fc_loc_undo )        "DUNO 제거
+                           ( cl_gui_alv_grid=&gt;mc_fc_loc_cut )         "CUT
+                           ( cl_gui_alv_grid=&gt;mc_mb_paste )           "PASTE
+                           ( cl_gui_alv_grid=&gt;mc_fc_loc_copy_row )    "COPY_ROW
+                           ( cl_gui_alv_grid=&gt;mc_fc_loc_append_row )  "APPNED_ROW
+                           ( cl_gui_alv_grid=&gt;mc_fc_loc_delete_row )  "DELETE_ROW
+                           ( cl_gui_alv_grid=&gt;mc_fc_loc_insert_row )  "INSERT_ROW
+                       ).
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      side      = gcl_container-&gt;dock_at_left " Side to Which Control is Docked
+      extension = 5000.                       " Control Extension
+
+  CREATE OBJECT gcl_grid
+    EXPORTING
+      i_parent = gcl_container.                " Parent Container
+
+  SET HANDLER : lcl_event_handler=&gt;handle_toolbar          FOR gcl_grid,
+                lcl_event_handler=&gt;handle_user_command     FOR gcl_grid,
+                lcl_event_handler=&gt;handle_changed_finished FOR gcl_grid.
+
+  CALL METHOD gcl_grid-&gt;register_edit_event     "event 가 더 민감하게 받을 수 있게 함수 사용
+    EXPORTING
+      i_event_id = gcl_grid-&gt;mc_evt_modified.   " Event ID
+
+  gs_variant-report = sy-repid.
+
+  CALL METHOD gcl_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant           = gs_variant       " Layout
+      i_save               = 'A'              " Save Layout
+      i_default            = 'X'              " Default Display Variant
+      is_layout            = gs_layout        " Layout
+      it_toolbar_excluding = gt_exclude       " Excluded Toolbar Standard Functions
+    CHANGING
+      it_outtab            = gt_mat           " Output Table
+      it_fieldcatalog      = gt_fcat.         " Field Catalog
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_style</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_style .
+
+  LOOP AT gt_mat ASSIGNING FIELD-SYMBOL(&lt;lfs_mat&gt;).
+
+    &lt;lfs_mat&gt;-style = VALUE #( "lvc_t_styl
+
+      ( fieldname = 'STLAL'
+        style     = cl_gui_alv_grid=&gt;mc_style_disabled )
+
+      ( fieldname = 'MATNR'
+        style     = cl_gui_alv_grid=&gt;mc_style_disabled )
+
+      ( fieldname = 'STLAN'
+        style     = cl_gui_alv_grid=&gt;mc_style_disabled )
+
+      ( fieldname = 'STLNR'
+        style     = cl_gui_alv_grid=&gt;mc_style_disabled )
+
+    ).
+
+  ENDLOOP.
+
+  UNASSIGN &lt;lfs_mat&gt;. "Clear
+
+<font color ="#0000FF">**********************************************************************</font>
+
+<font color ="#0000FF">*  DATA : lv_tabix TYPE sy-tabix,</font>
+<font color ="#0000FF">*         ls_style TYPE lvc_s_styl.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  LOOP AT gt_mat INTO gs_mat.     "ALV 에 표시될 데이터 한 행씩 처리 loop 사용</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    lv_tabix = sy-tabix.          "현재 행의 인덱스를 저장</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    REFRESH gs_mat-style.         "기존 스타일 초기화, 안하면 스타일이 누적된다.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    ls_style-fieldname = 'MATNR'.                            "비활성화 컬럼명</font>
+<font color ="#0000FF">*    ls_style-style     = cl_gui_alv_grid=&gt;mc_style_disabled. "입력불가 처리</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    INSERT ls_style INTO TABLE gs_mat-style.</font>
+<font color ="#0000FF">*    CLEAR  ls_style.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    ls_style-fieldname = 'STLAN'.                            "비활성화 컬럼명</font>
+<font color ="#0000FF">*    ls_style-style     = cl_gui_alv_grid=&gt;mc_style_disabled. "입력불가 처리</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    INSERT ls_style INTO TABLE gs_mat-style.</font>
+<font color ="#0000FF">*    CLEAR  ls_style.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    ls_style-fieldname = 'STLNR'.</font>
+<font color ="#0000FF">*    ls_style-style     = cl_gui_alv_grid=&gt;mc_style_disabled.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    INSERT ls_style INTO TABLE gs_mat-style.</font>
+<font color ="#0000FF">*    CLEAR  ls_style.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    ls_style-fieldname = 'STLAL'.</font>
+<font color ="#0000FF">*    ls_style-style     = cl_gui_alv_grid=&gt;mc_style_disabled.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    INSERT ls_style INTO TABLE gs_mat-style.</font>
+<font color ="#0000FF">*    CLEAR  ls_style.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    MODIFY gt_mat FROM gs_mat INDEX lv_tabix                 "변경된 style 정보만 내부테이블에 반영</font>
+<font color ="#0000FF">*    TRANSPORTING style.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  ENDLOOP.</font>
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_grid . "화면을 다시 그려준다.
+
+  CALL METHOD gcl_grid-&gt;refresh_table_display
+    EXPORTING
+      is_stable      = gs_stable              " 스크롤 위치 및 커서 고정
+      i_soft_refresh = space.                 " Without Sort, Filter, etc.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form save_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM save_data .
+
+  DATA :
+<font color ="#0000FF">*          ls_save   TYPE zc505t0047,         "필드 구조를 맞춰준다.</font>
+    lt_save   TYPE TABLE OF zc505t0047,
+    lt_del    TYPE TABLE OF zc505t0047,
+    lv_commit.
+
+  CALL METHOD gcl_grid-&gt;check_changed_data. "변화를 감지해준다.
+
+  IF gt_mat_del IS NOT INITIAL.             "삭제 테이블에 있는 데이터를 제거
+
+    MOVE-CORRESPONDING gt_mat_del TO lt_del.
+
+<font color ="#0000FF">*    DATA(lt_del) = CORRESPONDING zc505t0047( gt_mat_del ).</font>
+
+    DELETE zc505t0047 FROM TABLE lt_del.
+
+    IF sy-dbcnt &gt; 0.  " 0 이상이면 commit 에 'X' 를 넣어준다. move 로 감지
+      lv_commit = 'X'.
+    ENDIF.
+
+  ENDIF.
+
+<font color ="#0000FF">**********************************************************************</font>
+<font color ="#0000FF">*save 로직에서 modify 를 안하는 방법?</font>
+
+<font color ="#0000FF">*  LOOP AT gt_mat ASSIGNING FIELD-SYMBOL(&lt;fs_mat&gt;) WHERE mark EQ 'X'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    IF &lt;fs_mat&gt;-matnr IS INITIAL OR  "key 값이 비어져있을때 들어가는 것을 방지해준다.</font>
+<font color ="#0000FF">*       &lt;fs_mat&gt;-werks IS INITIAL OR</font>
+<font color ="#0000FF">*       &lt;fs_mat&gt;-stlal IS INITIAL OR</font>
+<font color ="#0000FF">*       &lt;fs_mat&gt;-stlnr IS INITIAL OR</font>
+<font color ="#0000FF">*       &lt;fs_mat&gt;-stlal IS INITIAL.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*      MESSAGE s000 WITH 'Input key field'</font>
+<font color ="#0000FF">*      DISPLAY LIKE 'E'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*      CONTINUE.</font>
+<font color ="#0000FF">*    ENDIF.</font>
+<font color ="#0000FF">*  ENDLOOP.</font>
+
+  LOOP AT gt_mat INTO gs_mat WHERE mark EQ 'X'.
+
+    IF gs_mat-matnr IS INITIAL OR  "key 값이 비어져있을때 들어가는 것을 방지해준다.
+       gs_mat-werks IS INITIAL OR
+       gs_mat-stlal IS INITIAL OR
+       gs_mat-stlnr IS INITIAL OR
+       gs_mat-stlal IS INITIAL.
+
+      MESSAGE s000 WITH 'Input key field'
+      DISPLAY LIKE 'E'.
+      CONTINUE. "Exit 을 사용하면 올바른 데이터들도 COMMIT 을 거치지 않고 loop 밖으로 나간다.
+      "continue. 사용, 다시 올라가서 루프 실행
+    ENDIF.
+
+    DATA(ls_save) = CORRESPONDING zc505t0047( gs_mat ). "#이 안된다. 경로를 못 읽음
+<font color ="#0000FF">*    MOVE-CORRESPONDING gs_mat TO ls_save.</font>
+
+    IF ls_save-erdat IS INITIAL.              "신규 데이터인 경우
+
+      ls_save-erdat = sy-datum.               "생성일
+      ls_save-erzet = sy-uzeit.               "생성시간
+      ls_save-ernam = sy-uname.               "생성자
+
+    ELSE.                                     "기존 데이터인 경우
+
+      ls_save-aedat = sy-datum.               "변경일
+      ls_save-aezet = sy-uzeit.               "변경시간
+      ls_save-aenam = sy-uname.               "변경자
+
+    ENDIF.
+
+<font color ="#0000FF">*    lt_save = VALUE zc505t0047 ( LS_SAVE ).</font>
+
+
+    APPEND ls_save TO lt_save.
+    CLEAR  ls_save.
+
+  ENDLOOP.
+
+  IF lt_save IS NOT INITIAL.                  "lt_save 에 값이 있으면
+
+    MODIFY zc505t0047 FROM TABLE lt_save.     "DB 테이블에 반영 (Insert or Update)
+
+    IF sy-dbcnt &gt; 0.
+      lv_commit = 'X'.
+    ENDIF.
+
+  ENDIF.
+
+  IF lv_commit IS NOT INITIAL.
+
+    COMMIT WORK AND WAIT.            "확정
+
+    REFRESH gt_mat_del.             "삭제 테이블 초기화
+
+    PERFORM clear_mark.             "다음 변경 확인을 위한 표시 해제
+    MESSAGE s002.                   "Data was saved successfully
+
+  ELSE.
+
+    ROLLBACK WORK.                   "아닐 시 ROLLBACK , 에러메세지 표시
+    MESSAGE s000 WITH 'Data was not changed' DISPLAY LIKE 'E'.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form clear_mark</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM clear_mark .
+
+  DATA : lv_tabix TYPE sy-tabix.
+
+  LOOP AT gt_mat INTO gs_mat WHERE mark EQ 'X'.
+    "체크(mark='X')된 행만 대상으로 반복
+
+    CLEAR gs_mat-mark. "현재 행 클리어
+
+    lv_tabix = sy-tabix.
+
+    MODIFY gt_mat FROM gs_mat INDEX lv_tabix
+    TRANSPORTING mark. "해당 인덱스의 행에서 mark 필드만 수정
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_toolbar</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_OBJECT_&gt;MT_TOOLBAR</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_toolbar  USING  pt_toolbar TYPE ttb_button. "ALV 화면에 표시될 목록
+
+  DATA : ls_toolbar TYPE stb_button. "APEEND 를 위한 STRUCTURE 선언, 버튼 1개씩 받을 수 있다.
+
+  ls_toolbar-function  = 'CREATE'.         " USER_COMMAND 로 전달
+  ls_toolbar-butn_type = 0.                " 0 = 일반 버튼
+  ls_toolbar-icon      = icon_insert_row.  " 아이콘
+  ls_toolbar-text      = 'Create'.         " 툴바 버튼 텍스트
+  ls_toolbar-quickinfo = 'Create'.         " 마우스 툴팁
+
+  APPEND ls_toolbar TO pt_toolbar.
+  CLEAR  ls_toolbar.
+
+  ls_toolbar-function  = 'DELETE'.          " USER_COMMAND 로 전달
+  ls_toolbar-butn_type = 0.                 " 0 = 일반 버튼
+  ls_toolbar-icon      = icon_delete_row.   " 아이콘
+  ls_toolbar-text      = 'Delete'.          " 툴바 버튼 텍스트
+  ls_toolbar-quickinfo = 'Delete'.          " 마우스 툴팁
+
+  APPEND ls_toolbar TO pt_toolbar.
+  CLEAR  ls_toolbar.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_user_command</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_UCOMM</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_user_command  USING    pv_ucomm TYPE sy-ucomm.
+
+  CASE pv_ucomm.
+
+    WHEN 'CREATE'.              "행 추가 버튼
+      PERFORM create_data.      "신규 행 추가
+      PERFORM refresh_grid.     "ALV 에 반영
+
+    WHEN 'DELETE'.              "삭제 버튼
+      PERFORM delete_data.      "선택 행 삭제
+
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_changed_finished</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_MODIFIED</font>
+<font color ="#0000FF">*&      --&gt; ET_GOOD_CELLS</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_changed_finished  USING    pv_modified
+                                       pt_good_cells TYPE lvc_t_modi.
+
+  DATA ls_modi TYPE lvc_s_modi.
+
+  CHECK pv_modified IS NOT INITIAL. "pv_modified 변경이 감지되면 체크 변경이 이루어지지 않으면 아래 로직을 안탄다.
+
+  LOOP AT pt_good_cells INTO ls_modi.
+
+    READ TABLE gt_mat INTO gs_mat INDEX ls_modi-row_id.
+
+    IF sy-subrc NE 0.
+      CONTINUE.
+    ENDIF.
+
+    gs_mat-mark = 'X'. "변경된 값에 MARK 를 넣어 SAVE 로직 안 LOOP를 통해 변경될 수 있게 해준다.
+
+    MODIFY gt_mat FROM gs_mat INDEX ls_modi-row_id
+    TRANSPORTING mark.   "mark 수정
+
+  ENDLOOP.
+
+  PERFORM refresh_grid. " ALV 화면 갱신
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form create_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM create_data .
+
+  CLEAR gs_mat.
+
+  gs_mat-mark  = abap_true. " 변경을 감지하여 save 를 해주고 싶기 때문에 mark 에 ture 값을 준다.
+  gs_mat-werks = pa_werks.  "새로 들어가는 행에 selection screen에서 적은 값을 초기값으로 넣어준다.
+
+  APPEND gs_mat TO gt_mat.  "gt_mat 에 append
+  CLEAR  gs_mat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form delete_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM delete_data .
+
+  _clear gs_row gt_row.                    "gs_row, gt_row clear
+
+  CALL METHOD gcl_grid-&gt;get_selected_rows  " 어떤 행이 선택되는지 알기 위해 method 호출
+    IMPORTING
+      et_index_rows = gt_row.              " Indexes of Selected Rows
+
+  IF gt_row IS INITIAL.                    "만약 사용자가 행을 선택하지 않고 delete를 눌렀을때 알려주는 안내 메세지
+    MESSAGE s000 WITH 'First, select rows'.
+    EXIT.                                  "exit  불필요한 로직 수행을 막는다.
+  ENDIF.
+
+  SORT gt_row BY index DESCENDING.         "ITAB 의 ROW 를 지울 때는 역순으로 삭제해야한다. DESENDING 정렬
+
+  LOOP AT gt_row INTO gs_row.
+
+    READ TABLE gt_mat INTO gs_mat INDEX gs_row-index.
+
+    IF sy-subrc EQ 0.
+
+      APPEND gs_mat TO gt_mat_del.      "삭제할 레코드를 gt_mat_del 에 옮겨준다.
+      CLEAR  gs_mat.
+
+      DELETE gt_mat INDEX gs_row-index. "gt_mat 에서 해당 레코드를 지워준다.
+
+    ENDIF.
+
+  ENDLOOP.
+
+  PERFORM refresh_grid.                 "ALV는 모르는 상태 REFRESH 로 알려준다.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data_method</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data_method .
+
+  DATA : lt_mat  TYPE zc505tt0047,        "class 는 function 보다 민감. 필드를 맞춰주기 위한 그릇 생성
+         lcl_mat TYPE REF TO zc505cl003.  "어디서 받는지 알려줘야한다.
+
+  IF lcl_mat IS NOT BOUND.                "lc_mat객체가 만들어지지 않았을때만 create object 실행
+    CREATE OBJECT lcl_mat.
+  ENDIF.
+
+  CALL METHOD lcl_mat-&gt;get_material_data
+    EXPORTING
+      iv_werks = pa_werks
+    CHANGING
+      et_data  = lt_mat.
+
+  CHECK lt_mat IS NOT INITIAL.
+
+  MOVE-CORRESPONDING lt_mat TO gt_mat.   "gt_mat 으로 select 한 db 전송
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data_function</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data_function .
+
+  DATA : lt_mat TYPE zc505tt0047. "table type
+
+  call function <a href ="zc505fm_get_materials/zc505fm_get_materials.html">'ZC505FM_GET_MATERIALS'</a>
+    EXPORTING
+      iv_werks = pa_werks
+    TABLES
+      et_data  = lt_mat.
+
+  CHECK lt_mat IS NOT INITIAL.
+
+  MOVE-CORRESPONDING lt_mat TO gt_mat.   "gt_mat 으로 select 한 db 전송
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

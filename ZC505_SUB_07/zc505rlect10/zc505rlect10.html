@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505RLECT10</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505RLECT10</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [C5] Submit and ABAP Memory Training</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505RLECT10</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505rlect10 MESSAGE-ID zc505m.
+<font color ="#0000FF">*submit 통해서 다른 리포트 프로그램의 특정 itab 의 레코드를 넘겨받고자 할때</font>
+<font color ="#0000FF">*Feat. ABAP Memory</font>
+DATA : lt_spfli TYPE TABLE OF spfli.
+
+EXPORT iv_sub = 'X' TO MEMORY ID 'CL5'.
+
+SUBMIT zc505r0058
+  WITH so_scarr EQ 'LH' SIGN 'I'
+   AND RETURN. "프로그램 밑으로 내려감
+
+REFRESH lt_spfli.
+
+IMPORT et_spfli = lt_spfli FROM MEMORY ID 'CL5'.
+
+FREE MEMORY ID 'CL5'.
+
+cl_demo_output=&gt;display( lt_spfli ).
+
+<font color ="#0000FF">*1. 단순히 타 리포트 프로그램 호출</font>
+<font color ="#0000FF">*SUBMIT zc505r0058.</font>
+
+<font color ="#0000FF">*2. 타 프로그램의 셀렉트 옵션 사용. Selection Screen 보고 가기</font>
+<font color ="#0000FF">*SUBMIT zc505r0058 VIA SELECTION-SCREEN</font>
+<font color ="#0000FF">*  WITH so_scarr EQ 'DL' SIGN 'I'</font>
+<font color ="#0000FF">*  AND RETURN.</font>
+
+<font color ="#0000FF">*3. 일반적으로 사용하는 패턴</font>
+<font color ="#0000FF">*TABLES : spfli.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECT-OPTIONS : so_conn FOR spfli-connid.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SUBMIT zc505r0058</font>
+<font color ="#0000FF">*  WITH pa_carr EQ 'LH'</font>
+<font color ="#0000FF">*  WITH so_conn IN so_conn</font>
+<font color ="#0000FF">*   AND RETURN.</font>
+<font color ="#0000FF">***********************************************************************</font>
+<font color ="#0000FF">*RANGES : lr_connid FOR spfli-connid.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*DATA : lv_carrid TYPE spfli-carrid.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*lv_carrid = 'AA'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*lr_connid-sign   = 'I'.</font>
+<font color ="#0000FF">*lr_connid-option = 'EQ'.</font>
+<font color ="#0000FF">*lr_connid-low    = '0017'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SUBMIT zc505r0058</font>
+<font color ="#0000FF">*  WITH pa_carr EQ lv_carrid</font>
+<font color ="#0000FF">*  WITH so_conn IN lr_connid</font>
+<font color ="#0000FF">*   AND RETURN.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0073_TOP</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0073_TOP</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0073_TOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include ZC505R0073_TOP                           - Report ZC505R0073</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r0073 MESSAGE-ID zc505m.
+
+TABLES : sflight.
+
+DATA : BEGIN OF gs_data,
+         carrid     TYPE sflight-carrid,
+         connid     TYPE sflight-connid,
+         fldate     TYPE sflight-fldate,
+         paymentsum TYPE sflight-paymentsum,
+         currency   TYPE sflight-currency,
+         planetype  TYPE sflight-planetype,
+       END OF gs_data,
+
+       gt_data LIKE TABLE OF gs_data.
+<font color ="#0000FF">**********************************************************************</font>
+DATA : gcl_container TYPE REF TO cl_gui_docking_container,
+       gcl_gird      TYPE REF TO cl_gui_alv_grid,
+<font color ="#0000FF">*       gs_fcat       TYPE lvc_s_fcat,</font>
+       gt_fcat       TYPE lvc_t_fcat,
+       gs_layout     TYPE lvc_s_layo,
+
+       gs_stable     TYPE lvc_s_stbl.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

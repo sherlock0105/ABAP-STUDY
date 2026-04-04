@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_22</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_22</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  인터널 테이블 스트럭처 개념</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_22</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_22 MESSAGE-ID zc505m.
+
+TYPES : gty_marc  TYPE marc, "Structure . gty = Structure type .
+        gtt_marc  TYPE TABLE OF marc, "ITAB --&gt; Table Type .
+        gtt_marc2 TYPE TABLE OF gty_marc, "Table Type,  Like 로 적으면 에러, 여긴 TYPE 만 가능
+<font color ="#0000FF">*        gtt_marc3 TYPE gtt_marc,  "이러면 에러가 난다. data 랑 다름</font>
+        gty_marc2 TYPE LINE OF gtt_marc, "Structure Type . Line of 를 적어주지 않으면 에러 발생.
+
+        BEGIN OF gty_line,
+          belnr TYPE bkpf-belnr,
+          gjahr TYPE bkpf-gjahr,
+          bukrs TYPE bkpf-bukrs,
+        END OF gty_line. "type 로 선언했기 때문에 변수로 사용이 불가핟.
+<font color ="#0000FF">*types는 저장 기능은 없다. 변수가 아님. 설계도라고 생각하기.</font>
+<font color ="#0000FF">* 이걸 가지고 실행하는건 데이터</font>
+
+<font color ="#0000FF">* TYPES 를 언제쓸까? 자주 사용하는 타입들이 중복될때 그걸 묶어서 INCLUDE TYPE 해준다. 그럼 편리하다.</font>
+
+<font color ="#0000FF">*Types 를 이용한 객체 선언</font>
+DATA: gs_marc  TYPE gty_marc, " Like 는 데이터를 선언한 것을 가져올때 쓰는것, 그래서 type을 써야한다.
+      gt_marc  TYPE TABLE OF gty_marc, "ITAB  .
+      gt_marc2 TYPE gtt_marc, "ITAB, 밑에 있는  gt_mara3 LIKE gt_mara 랑 같다.
+      gs_marc2 TYPE LINE OF gtt_marc, "Structure, 테이블을 참조하는 스트럭쳐를 선언하고 싶을때 .
+
+      BEGIN OF gs_list,
+        matnr TYPE gty_marc-matnr, "Types 에 있기 때문에 Like 불가  .
+        werks TYPE marc-werks.
+        INCLUDE TYPE gty_line. " INCLUDE STRUCTURE 불가.
+<font color ="#0000FF">*       INCLUDE TYPE scarr. "scarr 은 테이블이지만 들어간다. 하지만 딕셔너리에 있는 걸 사용할때는 INCLUDE STRUCTURE 를 사용할 것</font>
+        INCLUDE STRUCTURE scarr.
+DATA : mara  TYPE mara-matnr,
+      END OF gs_list.
+
+
+<font color ="#0000FF">* 인터널 테이블, 스트럭처 개념  .</font>
+DATA : gs_mara  TYPE mara,             "Structure    .
+       gt_mara  LIKE TABLE OF gs_mara, "ITAB  .
+       gt_mara2 TYPE TABLE OF mara, "ITAB   .
+       gs_mara2 LIKE gs_mara,       "Structure  .
+       gt_mara3 LIKE gt_mara,       "ITAB . LIKE 는 똑같이 복사한다. 그래서 TABLE OF 를 쓰지 않아도 테이블이 된다.
+       gs_mara3 LIKE LINE OF gt_mara. " LINE OF 가 없으면 ITAB, 적어주면 Structure 가 된다. line 구조만 가져오고 싶음
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

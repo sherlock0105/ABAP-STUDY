@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_09_HW</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_09_HW</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  숙제</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_09_HW</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_09_hw MESSAGE-ID zc505m.
+<font color ="#0000FF">**과제1********************************************************************</font>
+
+
+<font color ="#0000FF">*DATA : BEGIN OF ls_book3.</font>
+<font color ="#0000FF">*         INCLUDE STRUCTURE sbook.</font>
+<font color ="#0000FF">*DATA : billing,</font>
+<font color ="#0000FF">*       END OF ls_book3,</font>
+<font color ="#0000FF">*       lt_book3 LIKE TABLE OF ls_book3.</font>
+
+DATA : BEGIN OF ls_sbook,
+         carrid   TYPE sbook-carrid,
+         connid   TYPE sbook-connid,
+         fldate   TYPE sbook-fldate,
+         bookid   TYPE sbook-bookid,
+         customid TYPE sbook-customid,
+         custtype TYPE sbook-custtype,
+         smoker   TYPE sbook-smoker,
+         invoice  TYPE sbook-invoice,
+         billing,
+       END OF ls_sbook,
+
+       lt_sbook LIKE TABLE OF ls_sbook, "레코드 여러줄 저장(Internal Table)
+       lv_tabix TYPE sy-tabix.  "현재 행 번호 저장 변수
+
+CLEAR   : ls_sbook.  "구조체 내부값 모두 초기화
+REFRESH : lt_sbook. "내부테이블 모든 행 삭제
+
+<font color ="#0000FF">* [3] SELECT 실행 → lt_flight 에 여러 레코드 로드</font>
+SELECT carrid connid fldate bookid customid
+       custtype smoker invoice
+  INTO CORRESPONDING FIELDS OF TABLE lt_sbook
+  FROM sbook
+ WHERE carrid   EQ 'LH'
+   AND connid   IN ( '0401', '2402' )
+   AND customid GE '4387'.
+
+IF sy-subrc NE 0.
+
+  MESSAGE s001 DISPLAY LIKE 'E'.
+  STOP.
+
+ENDIF.
+
+LOOP AT lt_sbook INTO ls_sbook.
+
+  lv_tabix = sy-tabix.
+
+  CASE abap_true.
+
+    WHEN ls_sbook-invoice OR ls_sbook-smoker.
+
+      ls_sbook-billing = 'A'.
+
+      MODIFY lt_sbook FROM ls_sbook INDEX lv_tabix
+      TRANSPORTING billing.
+
+  ENDCASE.
+
+ENDLOOP.
+
+cl_demo_output=&gt;display( lt_sbook ).
+
+<font color ="#0000FF">**과제2********************************************************************</font>
+
+DATA : ls_sbook2 TYPE sbook,
+      lt_sbook2 LIKE TABLE OF ls_sbook2,
+      lv_tabix2 TYPE sy-tabix.
+
+<font color ="#0000FF">*DATA : BEGIN OF ls_sbook2,</font>
+<font color ="#0000FF">*         carrid   TYPE sbook-carrid,</font>
+<font color ="#0000FF">*         connid   TYPE sbook-connid,</font>
+<font color ="#0000FF">*         fldate   TYPE sbook-fldate,</font>
+<font color ="#0000FF">*         bookid   TYPE sbook-bookid,</font>
+<font color ="#0000FF">*         customid TYPE sbook-customid,</font>
+<font color ="#0000FF">*         custtype TYPE sbook-custtype,</font>
+<font color ="#0000FF">*         smoker   TYPE sbook-smoker,</font>
+<font color ="#0000FF">*         invoice  TYPE sbook-invoice,</font>
+<font color ="#0000FF">*         class    TYPE sbook-class,</font>
+<font color ="#0000FF">*       END OF ls_sbook2,</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*       lt_sbook2 LIKE TABLE OF ls_sbook2,</font>
+<font color ="#0000FF">*       lv_tabix2 TYPE sy-tabix.</font>
+
+CLEAR   : ls_sbook2.
+REFRESH : lt_sbook2.
+
+SELECT carrid connid fldate bookid customid
+       custtype smoker invoice class
+  INTO CORRESPONDING FIELDS OF TABLE lt_sbook2
+  FROM sbook
+ WHERE carrid     = 'DL'
+   AND custtype   = 'P'
+   AND order_date = '20251024'.
+
+IF sy-subrc NE 0.
+
+  MESSAGE s001 DISPLAY LIKE 'E'.
+  STOP.
+
+ENDIF.
+
+LOOP AT lt_sbook2 INTO ls_sbook2.
+
+  lv_tabix2 = sy-tabix.
+
+  IF ls_sbook2-smoker = abap_true AND ls_sbook2-invoice = abap_true.
+
+    ls_sbook2-class = 'F'.
+
+    MODIFY lt_sbook2 FROM ls_sbook2 INDEX lv_tabix2
+    TRANSPORTING class.
+
+  ENDIF.
+
+ENDLOOP.
+
+cl_demo_output=&gt;display( lt_sbook2 ).
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_11</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_11</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  SQL 12월 1일</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_11</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_11 MESSAGE-ID zc505m.
+
+<font color ="#0000FF">* 기본 변수 선언 - 집계 결과 저장</font>
+DATA : lv_cnt TYPE i,
+       lv_sum TYPE sflight-price,
+       lv_max TYPE sflight-price,
+       lv_min TYPE sflight-price,
+       lv_avg TYPE p DECIMALS 2.
+
+<font color ="#0000FF">* 변수 하나만 받는 경우</font>
+SELECT COUNT( * )
+        INTO lv_cnt
+        FROM sflight.
+<font color ="#0000FF">* 여러개의 변수에 받는 경우</font>
+SELECT COUNT( * ) SUM( price ) MAX( price )
+       MIN( price ) AVG( price )
+  INTO ( lv_cnt, lv_sum, lv_max, lv_min, lv_avg )
+  FROM sflight.
+
+WRITE : lv_cnt, lv_sum, lv_max, lv_min, lv_avg.
+
+
+<font color ="#0000FF">*********************************************************************</font>
+TABLES : sflight. " -&gt; DATA sflight TYPE sflight. 가장  위에 올릴 것.
+<font color ="#0000FF">*내부적으로 sflight 구조 하나를 자동 선언한 효과</font>
+
+<font color ="#0000FF">*DATA : gs_flight TYPE sflight,</font>
+<font color ="#0000FF">*       gv_carrid TYPE sflight-carrid.</font>
+<font color ="#0000FF">**********************************************************************</font>
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-t01.
+
+<font color ="#0000FF">*  SELECT-OPTIONS : so_carr FOR gs_flight-carrid,</font>
+<font color ="#0000FF">*                   so_car FOR gv_carrid.</font>
+
+<font color ="#0000FF">*기존에 선언된 아이만 데리고 올 수 있다.</font>
+  "  - 기본적으로 LOW, HIGH 두 값 존재 (interval)
+  "  - 다중 입력 가능
+    "  - IN 조건으로 WHERE carrid IN so_car 형태로 사용
+
+
+  SELECT-OPTIONS : so_car3 FOR sflight-carrid, "기본 형태: 값 여러 개 입력 가능, 범위도 가능
+                   so_car4 FOR sflight-carrid NO INTERVALS, "high 값 입력 불가. "즉, 단일 값 여러 개만 입력 가능
+                   so_car5 FOR sflight-carrid NO-EXTENSION, "NO-EXTENSION → 추가 행 입력 불가 (▶ 버튼 없앰)
+                   so_car6 FOR sflight-carrid NO INTERVALS NO-EXTENSION. "parameter 처럼 보이게 하기!.
+  "둘 다 적용 → 파라미터처럼 보이지만 형식은 select-options
+                   "LOW 1개만 입력 가능하고 범위/여러행 불가
+  "반드시 위에 데이터로 선언이 되어 있어야한다.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+<font color ="#0000FF">*********************************************************************</font>
+DATA : ls_air TYPE sflight,
+       lt_air LIKE TABLE OF ls_air.
+
+SELECT carrid connid fldate price currency
+  INTO CORRESPONDING FIELDS OF TABLE lt_air
+  FROM sflight
+<font color ="#0000FF">* WHERE carrid IN ('AA', 'LH', 'DL').</font>
+  WHERE carrid IN so_car3
+  ORDER BY carrid DESCENDING. "아무것도 입력하지 안했으면 where 조건에서 제외.
+
+IF sy-subrc NE 0.
+  MESSAGE s001.
+  STOP.
+ENDIF.
+
+<font color ="#0000FF">*cl_demo_output=&gt;display( lt_air ).</font>
+
+<font color ="#0000FF">**********************************************************************</font>
+
+  SELECTION-SCREEN BEGIN OF BLOCK bl2 WITH FRAME.
+
+    PARAMETERS : pa_werks TYPE marc-werks OBLIGATORY.
+
+  SELECTION-SCREEN END OF BLOCK bl2.
+
+DATA : ls_data TYPE marc,
+      lt_data LIKE TABLE OF ls_data.
+
+SELECT matnr werks pstat ekgrp dismm dispo beskz
+  INTO CORRESPONDING FIELDS OF TABLE lt_data
+  FROM marc
+ WHERE werks = pa_werks.
+
+ cl_demo_output=&gt;display( lt_data ).
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* SO_CAR D       .</font>
+<font color ="#0000FF">* SO_CAR3 D       .</font>
+<font color ="#0000FF">* SO_CARR D       .</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

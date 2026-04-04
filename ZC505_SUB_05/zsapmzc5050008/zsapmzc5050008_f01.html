@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZSAPMZC5050008_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZSAPMZC5050008_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include SAPMZC5050008_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          SAPMZC5050008_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form posting</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM posting .
+
+  DATA : lv_msg(100).
+  CLEAR   : gs_bdcdata, gs_messtab, gs_param.
+  REFRESH : gt_bdcdata, gt_messtab.
+
+  gs_param-dismode = 'N'.   " N : Screen 미표시 (실운영, 백그라운드)
+  gs_param-nobinpt = 'X'.
+  gs_param-updmode = 'S'.
+
+  PERFORM make_bdcdata USING : 'X'    'SAPBC402_PGCD_CREATE_CUSTOMER'    '0100',
+<font color ="#0000FF">*                               ' '    'BDC_CURSOR'         'SCUSTOM-DISCOUNT',</font>
+                               ' '    'SCUSTOM-NAME'       scustom-name,
+                               ' '    'SCUSTOM-FORM'       scustom-form,
+                               ' '    'SCUSTOM-STREET'     scustom-street,
+                               ' '    'SCUSTOM-POSTBOX'    scustom-postbox,
+                               ' '    'SCUSTOM-POSTCODE'   scustom-postcode,
+                               ' '    'SCUSTOM-CITY'       scustom-city,
+                               ' '    'SCUSTOM-COUNTRY'    scustom-country,
+                               ' '    'SCUSTOM-REGION'     scustom-region,
+                               ' '    'SCUSTOM-TELEPHONE'  scustom-telephone,
+                               ' '    'SCUSTOM-EMAIL'      scustom-email,
+                               ' '    'SCUSTOM-CUSTTYPE'   scustom-custtype,
+                               ' '    'SCUSTOM-DISCOUNT'   scustom-discount,
+                               ' '    'SCUSTOM-LANGU'      scustom-langu,
+                               ' '    'BDC_OKCODE'         '=SAVE'.
+
+
+  IF scustom-name IS INITIAL.
+
+    MESSAGE s000 WITH 'Please Input name ' DISPLAY LIKE 'E'.
+    EXIT.
+
+  ENDIF.
+
+  CALL TRANSACTION 'BC402_CALD_CRE_CUST' USING         gt_bdcdata
+                                         OPTIONS FROM  gs_param
+                                         MESSAGES INTO gt_messtab.
+
+  READ TABLE gt_messtab INTO gs_messtab WITH KEY msgid = 'BC402_C62'
+                                                 msgnr = '015'.
+
+  IF sy-subrc EQ 0.
+
+    CALL FUNCTION 'MESSAGE_TEXT_BUILD'
+      EXPORTING
+        msgid               = gs_messtab-msgid
+        msgnr               = gs_messtab-msgnr
+        msgv1               = gs_messtab-msgv1
+        msgv2               = gs_messtab-msgv2
+        msgv3               = gs_messtab-msgv3
+        msgv4               = gs_messtab-msgv4
+      IMPORTING
+        message_text_output = lv_msg.
+
+    CONDENSE lv_msg.
+
+    MESSAGE s000 WITH lv_msg.
+  ELSE.
+    MESSAGE s000 WITH 'Posting failed' DISPLAY LIKE 'E'.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_bdcdata</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_bdcdata  USING  pv_begin pv_fnam pv_fval.
+
+  CASE pv_begin.
+    WHEN 'X'.
+      gs_bdcdata-dynbegin = pv_begin.
+      gs_bdcdata-program  = pv_fnam.
+      gs_bdcdata-dynpro   = pv_fval.
+
+    WHEN OTHERS.
+      gs_bdcdata-fnam = pv_fnam.
+      gs_bdcdata-fval = pv_fval.
+
+  ENDCASE.
+
+  APPEND gs_bdcdata TO gt_bdcdata.
+  CLEAR  gs_bdcdata.
+
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

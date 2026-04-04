@@ -1,0 +1,370 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZSAPMZC5050006_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZSAPMZC5050006_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include SAPMZC5050006_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          SAPMZC5050006_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout-zebra = 'X'.
+  gs_layout-cwidth_opt = 'A'.
+  gs_layout-sel_mode   = 'D'.
+  gs_layout-grid_title = 'Module pool Text Edit Training'.
+  gs_layout-smalltitle = 'X'.
+
+  PERFORM make_fcat USING :
+   'X'   'STEEL'          ' ' 'ZC505T0050'  ' '  ' ',
+   'X'   'WERKS'          ' ' 'ZC505T0050'  ' '  ' ',
+   ' '   'INDUSTRY_KIND'  ' ' 'ZC505T0050'  ' '  ' ',
+   ' '   'AREA'           ' ' 'ZC505T0050'  ' '  ' ',
+   ' '   'MEMO'           ' ' 'ZC505T0050'  ' '  ' ',
+   ' '   'PRODUCT_QTY'    ' ' 'ZC505T0050'  ' '  ' ',
+   ' '   'PRODUCT_UNIT'   ' ' 'ZC505T0050'  ' '  ' ',
+   ' '   'UNIT_PRICE'     ' ' 'ZC505T0050'  ' '  ' ',
+   ' '   'PRICE_UNIT'     ' ' 'ZC505T0050'  ' '  ' '.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat  USING  pv_key
+                       pv_field
+                       pv_text
+                       pv_ref_table
+                       pv_ref_field
+                       pv_edit.
+
+  gs_fcat-key       = pv_key.
+  gs_fcat-fieldname = pv_field.
+  gs_fcat-ref_table = pv_ref_table.
+  gs_fcat-ref_field = pv_ref_field.
+  gs_fcat-edit      = pv_edit.
+
+  CASE pv_field.
+
+    WHEN 'PRODUCT_QTY'. "통화키 연결
+      gs_fcat-qfieldname = 'PRODUCT_UNIT'.
+
+    WHEN 'UNIT_PRICE'.
+      gs_fcat-cfieldname = 'PRICE_UNIT'.
+
+  ENDCASE.
+
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR  gs_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  _clear gs_data gt_data.
+
+  SELECT steel werks industry_kind area memo
+        product_qty product_unit unit_price price_unit
+    INTO CORRESPONDING FIELDS OF TABLE gt_data
+    FROM zc505t0050
+   ORDER BY steel werks.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      container_name = 'GCL_CONTAINER'.
+
+  CREATE OBJECT gcl_splitter
+    EXPORTING
+      parent  = gcl_container                  " Parent Container
+      rows    = 2                   " Number of Rows to be displayed
+      columns = 1.                   " Number of Columns to be Displayed
+
+<font color ="#0000FF">*Text Edit Container</font>
+  CALL METHOD gcl_splitter-&gt;get_container
+    EXPORTING
+      row       = 1                 " Row
+      column    = 1                " Column
+    RECEIVING
+      Container = gcl_container_t. "gt_scarr
+
+<font color ="#0000FF">*ALV Container</font>
+  CALL METHOD gcl_splitter-&gt;get_container
+    EXPORTING
+      row       = 2                  " Row
+      column    = 1                 " Column
+    RECEIVING
+      container = gcl_container_a.  " Container
+
+  CREATE OBJECT gcl_grid_alv
+    EXPORTING
+      i_parent = gcl_container_a.    " Parent Container
+
+  gs_variant-report = sy-repid.
+  gs_variant-handle = 'ALV'. "구분자
+
+  CALL METHOD gcl_grid_alv-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant                 " Layout
+      i_save          = 'A'                      " Save Layout
+      i_default       = 'X'                    " Default Display Variant
+      is_layout       = gs_layout                 " Layout
+<font color ="#0000FF">*     it_toolbar_excluding          =            Excluded Toolbar Standard Functions</font>
+    CHANGING
+      it_outtab       = gt_data                 " Output Table
+      it_fieldcatalog = gt_fcat.                 " Field Catalog
+
+  CALL METHOD gcl_splitter-&gt;set_row_height
+    EXPORTING
+      id     = 1                  " Row ID
+      height = 30.                " Height
+
+<font color ="#0000FF">*Text Edit 관련</font>
+  CREATE OBJECT gcl_text_edit
+    EXPORTING
+      parent        = gcl_container_t                          " Parent Container
+      wordwrap_mode = gcl_text_edit-&gt;wordwrap_at_windowborder.
+
+  CALL METHOD gcl_text_edit-&gt;set_toolbar_mode
+    EXPORTING
+      toolbar_mode = 0.            " visibility of toolbar; eq 0: OFF ; ne 0: ON
+
+  CALL METHOD gcl_text_edit-&gt;set_statusbar_mode
+    EXPORTING
+      statusbar_mode = 0.           " visibility of statusbar; eq 0: OFF ; ne 0: ON
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form save_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM save_data .
+
+  DATA : ls_save TYPE zc505t0050.
+
+<font color ="#0000FF">*key 값 체크</font>
+  IF gs_data-steel IS INITIAL OR
+     gs_data-werks IS INITIAL.
+
+    MESSAGE s000 WITH 'Input key field data' DISPLAY LIKE 'E'.
+    EXIT.
+  ENDIF.
+
+  MOVE-CORRESPONDING gs_data TO ls_save. "ls_save 읽은 값 전달
+
+  CALL METHOD gcl_text_edit-&gt;get_textstream
+    IMPORTING
+      text = ls_save-memo.                  " Text as String with Carriage Returns and Linefeeds
+
+  cl_gui_cfw=&gt;flush( ).
+
+  MODIFY zc505t0050 FROM ls_save.
+
+  IF sy-dbcnt &gt; 0.
+
+    COMMIT WORK AND WAIT.
+    PERFORM get_data.
+    PERFORM refresh_grid.
+
+    CALL METHOD gcl_text_edit-&gt;delete_text
+      EXCEPTIONS
+        error_cntl_call_method = 1                " Error while setting property of TextEdit control!
+        OTHERS                 = 2.
+
+    MESSAGE s002.
+
+  ELSE.
+
+    ROLLBACK WORK.
+    MESSAGE s004 DISPLAY LIKE 'E'.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_grid .
+
+  CALL METHOD gcl_grid_alv-&gt;refresh_table_display
+    EXPORTING
+      is_stable      = gs_stable                  " With Stable Rows/Columns
+      i_soft_refresh = space.                 " Without Sort, Filter, etc.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form delete_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM delete_data .
+
+  IF gs_data-steel IS INITIAL OR "둘중 키값이 하나라도 없으면 나가라
+     gs_data-werks IS INITIAL.
+    MESSAGE s000 WITH 'Please input key field' DISPLAY LIKE 'E'.
+    EXIT.
+  ENDIF.
+
+  DELETE FROM zc505t0050
+  WHERE steel EQ gs_data-steel
+   AND  werks EQ gs_data-werks.
+
+  IF sy-dbcnt &gt; 0.
+
+    COMMIT WORK AND WAIT.
+    PERFORM get_data.
+    PERFORM refresh_grid.
+    MESSAGE s003.
+
+  ELSE.
+
+    ROLLBACK WORK.
+    MESSAGE s000 WITH 'Delete failed'.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_data .
+
+  _clear gs_row gt_row.
+
+  CALL METHOD gcl_grid_alv-&gt;get_selected_rows
+    IMPORTING
+      et_index_rows = gt_row.                 " Indexes of Selected Rows
+
+  IF gt_row IS INITIAL.
+    MESSAGE s000 WITH 'First, select a row'.
+    EXIT.
+  ENDIF.
+
+  READ TABLE gt_row INTO gs_row INDEX 1.
+
+  CHECK sy-subrc EQ 0.
+
+  READ TABLE gt_data INTO gs_data INDEX gs_row-index.
+
+  CALL METHOD gcl_text_edit-&gt;set_textstream
+    EXPORTING
+      text = gs_data-memo.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form clear_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM clear_data .
+
+  CLEAR : gs_data.
+
+  CALL METHOD gcl_text_edit-&gt;delete_text
+    EXCEPTIONS
+      error_cntl_call_method = 1                " Error while setting property of TextEdit control!
+      OTHERS                 = 2.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form f4_werks</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM f4_werks .
+
+  DATA : BEGIN OF ls_data,
+           werks TYPE t001w-werks,
+           name1 TYPE t001w-name1,
+         END OF ls_data,
+
+         lt_data LIKE TABLE OF ls_data.
+
+  SELECT werks name1
+    INTO CORRESPONDING FIELDS OF TABLE lt_data
+    FROM t001w.
+
+  IF sy-subrc NE 0.
+    MESSAGE s001 DISPLAY LIKE 'E'.
+    EXIT.
+  ENDIF.
+
+  CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'    " F4 help also returning the value to be displayed in internal table
+    EXPORTING
+      retfield     = 'WERKS'                      " Name of return field in FIELD_TAB
+      dynpprog     = sy-repid                     " Current program
+      dynpnr       = sy-dynnr                     " Screen number
+      dynprofield  = 'GS_DATA-WERKS'              " Name of screen field for value return
+      window_title = 'Plants/Branches'            " Title for the hit list
+      value_org    = 'S'                          " Value return: C: cell by cell, S: structured
+    TABLES
+      value_tab    = lt_data.                     " Table of values: entries cell by cell
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

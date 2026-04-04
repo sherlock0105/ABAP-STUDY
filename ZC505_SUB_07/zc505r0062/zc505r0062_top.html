@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0062_TOP</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0062_TOP</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0062_TOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include ZC505R0062_TOP                           - Report ZC505R0062</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r0062 MESSAGE-ID zc505m.
+
+DATA : BEGIN OF gs_data,          "bkpf
+         bukrs TYPE bkpf-bukrs,
+         gjahr TYPE bkpf-gjahr,
+         belnr TYPE bkpf-belnr,
+         budat TYPE bkpf-budat,
+         blart TYPE bkpf-blart,
+         bktxt TYPE bkpf-bktxt,
+         xrueb TYPE bkpf-xrueb,
+       END OF gs_data,
+
+       gt_data   LIKE TABLE OF gs_data,
+
+       gv_okcode TYPE sy-ucomm.
+
+DATA : BEGIN OF gs_acc,
+         belnr TYPE bkpf-belnr,
+         bldat TYPE bkpf-bldat,
+         buzei TYPE bseg-buzei,
+         bschl TYPE bseg-bschl,
+         koart TYPE bseg-koart,
+         shkzg TYPE bseg-shkzg,
+         dmbtr TYPE bseg-dmbtr,
+         pswsl TYPE bseg-pswsl,
+         sgtxt TYPE bseg-sgtxt,
+         kokrs TYPE bseg-kokrs,
+         color TYPE lvc_t_scol,
+       END OF gs_acc,
+
+       gt_acc LIKE TABLE OF gs_acc.
+
+DATA : gcl_container      TYPE REF TO cl_gui_docking_container,
+       gcl_splitter       TYPE REF TO cl_gui_splitter_container,
+
+       gcl_container_data TYPE REF TO cl_gui_container,
+       gcl_container_acc  TYPE REF TO cl_gui_container,
+
+       gcl_grid_data      TYPE REF TO cl_gui_alv_grid,
+       gcl_grid_acc       TYPE REF TO cl_gui_alv_grid,
+
+       gs_fcat            TYPE lvc_s_fcat,
+       gt_fcat_data       TYPE lvc_t_fcat,
+       gt_fcat_acc        TYPE lvc_t_fcat,
+
+       gs_layout          TYPE lvc_s_layo,
+       gs_stable          TYPE lvc_s_stbl,
+       gs_variant         TYPE disvariant.
+
+DEFINE _clear.
+
+  CLEAR   &1.
+  REFRESH &2.
+
+END-OF-DEFINITION.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

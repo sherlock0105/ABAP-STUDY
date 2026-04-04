@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_32</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_32</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  12월 11일</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_32</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_32 MESSAGE-ID zc505m.
+
+TABLES : afpo.
+<font color ="#0000FF">* include 연습</font>
+<font color ="#0000FF">*TYPES : BEGIN OF gty_order,</font>
+<font color ="#0000FF">*          aufnr TYPE afko-aufnr,</font>
+<font color ="#0000FF">*          gstrp TYPE afko-gstrp,</font>
+<font color ="#0000FF">*          gltrp TYPE afko-gltrp,</font>
+<font color ="#0000FF">*        END OF gty_order.</font>
+
+<font color ="#0000FF">*DATA : BEGIN OF gs_order2.</font>
+<font color ="#0000FF">*         INCLUDE TYPE gty_order.</font>
+<font color ="#0000FF">*DATA :   rsnum TYPE afko-rsnum,</font>
+<font color ="#0000FF">*         gamng TYPE afko-gamng,</font>
+<font color ="#0000FF">*         plnty TYPE afko-plnty,</font>
+<font color ="#0000FF">*         pltxt TYPE tca02-txt, "텍테   .as 줄것</font>
+<font color ="#0000FF">*         lgort TYPE afpo-lgort,</font>
+<font color ="#0000FF">*         dauat TYPE afpo-dauat,</font>
+<font color ="#0000FF">*         datxt TYPE t003p-txt, " 텍테 ,  as 줄것 .</font>
+<font color ="#0000FF">*       END OF gs_order2,</font>
+<font color ="#0000FF">*       gt_order2 LIKE TABLE OF gs_order2.</font>
+
+DATA : BEGIN OF gs_order,
+         aufnr TYPE afko-aufnr,
+         gstrp TYPE afko-gstrp,
+         gltrp TYPE afko-gltrp,
+         rsnum TYPE afko-rsnum,
+         gamng TYPE afko-gamng,
+         plnty TYPE afko-plnty,
+         pltxt TYPE tca02-txt, "텍테   .as 줄것
+         lgort TYPE afpo-lgort,
+         dauat TYPE afpo-dauat,
+         datxt TYPE t003p-txt, " 텍테 ,  as 줄것 .
+       END OF gs_order,
+
+       gt_order LIKE TABLE OF gs_order,
+
+       BEGIN OF gs_out,
+         aufnr TYPE afko-aufnr,
+         gstrp TYPE afko-gstrp,
+         gltrp TYPE afko-gltrp,
+         plnty TYPE afko-plnty,
+         pltxt TYPE tca02-txt, "텍테   .as 줄것
+         lgort TYPE afpo-lgort,
+         dauat TYPE afpo-dauat,
+         datxt TYPE t003p-txt, " 텍테 ,  as 줄것 .
+       END OF gs_out,
+
+       gt_out LIKE TABLE OF gs_out.
+
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-t01.
+
+  SELECT-OPTIONS : so_mat FOR afpo-matnr.
+  PARAMETERS     : pa_pwe TYPE afpo-pwerk OBLIGATORY.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+INITIALIZATION.
+  pa_pwe = '0001'.
+
+  so_mat-sign    = 'I'.
+  so_mat-option  = 'EQ'.
+  so_mat-low     = 'SMT056T'.
+
+  APPEND so_mat.
+
+  so_mat-sign    = 'I'.
+  so_mat-option  = 'EQ'.
+  so_mat-low     = 'T-ASA00'.
+
+  APPEND so_mat.
+
+START-OF-SELECTION.
+
+  CLEAR   : gs_order, gs_out.
+  REFRESH : gt_order, gt_out.
+
+<font color ="#0000FF">*afko - AUFNR</font>
+  SELECT a~aufnr a~gstrp a~gltrp a~rsnum a~gamng a~plnty
+         b~lgort b~dauat
+         c~txt AS pltxt
+         d~txt AS datxt
+    INTO CORRESPONDING FIELDS OF TABLE gt_order
+    FROM afko AS a
+   INNER JOIN afpo AS b
+      ON a~aufnr EQ  b~aufnr
+    LEFT OUTER JOIN tca02 AS c
+      ON a~plnty EQ c~plnty
+     AND c~spras EQ sy-langu
+    LEFT OUTER JOIN t003p AS d
+      ON b~dauat EQ d~auart
+     AND d~spras EQ sy-langu
+   WHERE matnr IN so_mat
+     AND pwerk EQ pa_pwe.
+
+  IF sy-subrc NE 0.
+    MESSAGE s001.
+    STOP.
+  ENDIF.
+
+  MOVE-CORRESPONDING gt_order TO gt_out.
+
+  cl_demo_output=&gt;display( gt_out ).
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T01 Selection Condition</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_PWE D       .</font>
+<font color ="#0000FF">* SO_MAT D       .</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZSAPMZC5050004_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZSAPMZC5050004_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include SAPMZC5050004_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          SAPMZC5050004_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout-zebra      = 'D'.
+  gs_layout-cwidth_opt = 'A'.
+  gs_layout-sel_mode   = 'D'.
+  gs_layout-grid_title = 'Material Quantity and Amount'.
+  gs_layout-smalltitle = 'X'.
+
+  gs_stable-row  = 'X'.
+  gs_stable-col  = 'X'.
+
+  PERFORM make_fcat USING :
+     'X' 'MATNR' ' '  'ZC505T0018'  ' ',
+     'X' 'WERKS' ' '  'ZC505T0018'  ' ',
+     ' ' 'MTART' ' '  'ZC505T0018'  ' ',
+     ' ' 'MENGE' ' '  'ZC505T0018'  ' ',
+     ' ' 'MEINS' ' '  'ZC505T0018'  ' ',
+     ' ' 'DMBTR' ' '  'ZC505T0018'  ' ',
+     ' ' 'WAERS' ' '  'ZC505T0018'  ' '.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  _clear gs_data gt_data.
+
+  SELECT matnr werks mtart
+         menge meins dmbtr waers
+         erdat erzet ernam
+         aedat aezet aenam
+    INTO CORRESPONDING FIELDS OF TABLE gt_data
+    FROM zc505t0018
+   ORDER BY matnr werks.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat  USING  pv_key
+                       pv_field
+                       pv_text
+                       pv_ref_table
+                       pv_ref_field.
+
+  gs_fcat-key       = pv_key.
+  gs_fcat-fieldname = pv_field.
+  gs_fcat-coltext   = pv_text.
+  gs_fcat-ref_table = pv_ref_table.
+  gs_fcat-ref_field = pv_ref_field.
+
+  CASE pv_field.
+    WHEN 'MENGE'.
+      gs_fcat-qfieldname = 'MEINS'.
+    WHEN 'DMBTR'.
+      gs_fcat-cfieldname = 'WAERS'.
+  ENDCASE.
+
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR  gs_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      container_name = 'GCL_CONTAINER'. " Name of the Screen CustCtrl Name to Link Container To
+
+  CREATE OBJECT gcl_grid
+    EXPORTING
+      i_parent = gcl_container.                " Parent Container
+
+  gs_variant-report = sy-repid.
+
+  CALL METHOD gcl_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant       " Layout
+      i_save          = 'A'              " Save Layout
+      i_default       = 'X'              " Default Display Variant
+      is_layout       = gs_layout        " Layout
+    CHANGING
+      it_outtab       = gt_data          " Output Table
+      it_fieldcatalog = gt_fcat.         " Field Catalog
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_data .
+
+  _clear gs_row gt_row.
+
+  CALL METHOD gcl_grid-&gt;get_selected_rows
+    IMPORTING
+      et_index_rows = gt_row.                 " Indexes of Selected Rows
+
+  IF gt_row IS INITIAL.
+    MESSAGE s000 WITH 'choose a row.' DISPLAY LIKE 'E'.
+    EXIT.
+  ENDIF.
+
+  IF lines( gt_row ) &gt; 1.
+    MESSAGE s000 WITH '행을 한 개만 선택하세요'.
+    EXIT.
+  ENDIF.
+
+  READ TABLE gt_row INTO gs_row INDEX 1.
+
+  IF sy-subrc NE 0.
+    MESSAGE s000 WITH 'First, select rows'.
+    EXIT.
+  ENDIF.
+
+  READ TABLE gt_data INTO gs_data INDEX gs_row-index.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form save_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM save_data .
+
+  DATA : ls_save TYPE zc505t0018.
+
+  IF gs_data-matnr IS INITIAL OR gs_data-werks IS INITIAL.
+    MESSAGE s000 WITH 'key field required' DISPLAY LIKE 'E'.
+    EXIT.
+  ENDIF.
+
+  MOVE-CORRESPONDING gs_data TO ls_save.
+
+  IF ls_save-erdat IS INITIAL.
+
+    ls_save-erdat = sy-datum.
+    ls_save-erzet = sy-uzeit.
+    ls_save-ernam = sy-uname.
+
+  ELSE.
+
+    ls_save-aedat = sy-datum.
+    ls_save-aezet = sy-uzeit.
+    ls_save-aenam = sy-uname.
+
+  ENDIF.
+
+  MODIFY zc505t0018 FROM ls_save.
+
+  IF sy-dbcnt &gt; 0.
+    COMMIT WORK AND WAIT.
+    MESSAGE s002. "Data was saved successfully
+
+    PERFORM get_data.
+    PERFORM refresh_grid.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_grid .
+
+  CALL METHOD gcl_grid-&gt;refresh_table_display
+    EXPORTING
+      is_stable      = gs_stable        " With Stable Rows/Columns
+      i_soft_refresh = space.           " Without Sort, Filter, etc.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form delete_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM delete_data .
+
+  IF gs_data-matnr IS INITIAL OR gs_data-werks IS INITIAL.
+    MESSAGE s000 WITH 'key field required'
+    DISPLAY LIKE 'E'.
+    EXIT.
+  ENDIF.
+
+  DELETE FROM zc505t0018
+  WHERE matnr EQ gs_data-matnr
+    AND werks EQ gs_data-werks.
+
+  IF sy-subrc EQ 0.
+    COMMIT WORK AND WAIT.
+    MESSAGE s003. "Data was deleted successfully
+
+    PERFORM get_data.
+    PERFORM refresh_grid.
+
+  ELSE.
+    ROLLBACK WORK.
+    MESSAGE s005 DISPLAY LIKE 'E'.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form f4_matnr</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM f4_matnr .
+  "Material Type 값을 f4 서치헬프로 제공할것
+  DATA : BEGIN OF ls_mtart, "받아줄 그릇을 만들기
+           mtart TYPE t134-mtart,
+           vmtpo TYPE t134-vmtpo,
+           vprsv TYPE t134-vprsv,
+           mtbez TYPE t134t-mtbez,
+         END OF ls_mtart,
+
+         lt_mtart LIKE TABLE OF ls_mtart.
+
+  SELECT a~mtart a~vmtpo a~vprsv "데이터를 가져와준다.
+         b~mtbez
+    INTO CORRESPONDING FIELDS OF TABLE lt_mtart
+    FROM t134 AS a
+    LEFT OUTER JOIN T134t AS b
+      ON a~mtart EQ b~mtart
+     AND b~spras EQ sy-langu.
+
+  CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+    EXPORTING
+      retfield     = 'MTART'
+      dynpprog     = sy-repid
+      dynpnr       = sy-dynnr
+      dynprofield  = 'GS_DATA-MTART'
+      window_title = 'Material Types'
+      value_org    = 'S'
+    TABLES
+      value_tab    = lt_mtart.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form clear_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM clear_data .
+
+  CLEAR gs_data.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_input_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_input_data .
+
+  IF gs_data-matnr IS INITIAL OR
+     gs_data-werks IS INITIAL.
+
+    MESSAGE s000 WITH 'input key field' DISPLAY LIKE 'E'.
+    EXIT.
+
+  ENDIF.
+
+  READ TABLE gt_data INTO gs_data WITH KEY matnr = gs_data-matnr
+                                           werks = gs_data-werks.
+
+  IF sy-subrc NE 0.
+
+    MESSAGE s000 WITH 'Data not found' DISPLAY LIKE 'E'.
+    CLEAR : gs_data-mtart,
+            gs_data-menge,
+            gs_data-meins,
+            gs_data-dmbtr,
+            gs_data-waers.
+  ENDIF.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

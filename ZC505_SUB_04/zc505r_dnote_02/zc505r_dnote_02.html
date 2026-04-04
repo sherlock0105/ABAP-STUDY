@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_DNOTE_02</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_DNOTE_02</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [C5] DML LOOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_DNOTE_02</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_dnote_02 MESSAGE-ID zc505m.
+
+DATA : BEGIN OF gs_class,
+         class  TYPE zc505t0002-class,
+         cl_num TYPE zc505t0002-cl_num,
+         name   TYPE zc505t0002-name,
+         phone  TYPE zc505t0002-phone,
+         gender TYPE zc505t0002-gender,
+       END OF gs_class,
+
+       gt_class LIKE TABLE OF gs_class.
+
+DEFINE _clear.
+
+  CLEAR   &1.
+  REFRESH &2.
+
+END-OF-DEFINITION.
+<font color ="#0000FF">**********************************************************************</font>
+
+_clear gs_class gt_class.
+
+SELECT class cl_num name phone gender
+  INTO CORRESPONDING FIELDS OF TABLE gt_class
+  FROM zc505t0002.
+
+IF sy-subrc NE 0.
+  MESSAGE s001.
+  LEAVE LIST-PROCESSING.
+ENDIF.
+
+<font color ="#0000FF">*PERFORM updata_data.</font>
+
+PERFORM delete_data.
+
+FORM updata_data .
+<font color ="#0000FF">*gt_class 에 있는 phone 을 '11111111' 로 바꿔보자</font>
+  DATA : ls_update TYPE zc505t0002,
+         lt_update TYPE TABLE OF zc505t0002,
+         lv_tabix  TYPE sy-tabix.
+
+  _clear ls_update lt_update.
+
+  LOOP AT gt_class INTO gs_class.
+
+    lv_tabix = sy-tabix.
+
+    gs_class-phone = '11111111'.
+
+    MODIFY gt_class FROM gs_class INDEX lv_tabix
+    TRANSPORTING phone.
+
+  ENDLOOP.
+
+  MOVE-CORRESPONDING gt_class TO lt_update.
+
+  IF lt_update IS NOT INITIAL.
+
+    UPDATE zc505t0002 FROM TABLE lt_update.
+
+    IF sy-dbcnt &gt; 0.
+      COMMIT WORK AND WAIT. "맨 마지막에 여러번 x
+      MESSAGE s002.
+    ELSE.
+      ROLLBACK WORK.
+      MESSAGE s004 DISPLAY LIKE 'E'.
+    ENDIF.
+
+  ENDIF.
+
+<font color ="#0000FF">*03 지수 -&gt; 로제</font>
+  UPDATE zc505t0002 SET name = '로제'
+   WHERE class  = 'CL5'
+     AND cl_num = '03'.
+
+<font color ="#0000FF">*IF sy-sybrc = 0.</font>
+  IF sy-subrc = 0.
+    COMMIT WORK AND WAIT.
+    MESSAGE s002.
+  ELSE.
+    ROLLBACK WORK.
+    MESSAGE s004 DISPLAY LIKE 'E'.
+  ENDIF.
+ENDFORM.
+
+<font color ="#0000FF">**********************************************************************</font>
+FORM delete_data .
+
+  DATA : ls_del TYPE zc505t0002,
+         lt_del TYPE TABLE OF zc505t0002.
+
+  _clear ls_del lt_del.
+
+<font color ="#0000FF">* gender 가 'F' 인 레코드를 삭제해보자</font>
+
+  LOOP AT gt_class INTO gs_class WHERE gender EQ 'F'.
+
+    MOVE-CORRESPONDING gs_class TO ls_del.
+
+    APPEND ls_del TO lt_del.
+    CLEAR  ls_del.
+
+  ENDLOOP.
+
+  IF lt_del IS NOT INITIAL.
+
+    DELETE zc505t0002 FROM TABLE lt_del.
+
+    IF sy-dbcnt &gt; 0.
+      COMMIT WORK AND WAIT. "순서 중요
+      MESSAGE s003.
+    ELSE.
+      ROLLBACK WORK.
+      MESSAGE s005.
+    ENDIF.
+
+  ENDIF.
+
+<font color ="#0000FF">* field 하나 날려보기</font>
+
+  DELETE FROM zc505t0002
+  WHERE class = 'CL5'
+   AND  cl_num = '05'.
+
+  IF sy-subrc EQ 0.
+    COMMIT WORK AND WAIT.
+    MESSAGE s003.
+  ELSE.
+    ROLLBACK WORK.
+    MESSAGE s005.
+  ENDIF.
+
+ENDFORM.
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+<font color ="#0000FF">*002   Data was saved successfully</font>
+<font color ="#0000FF">*003   Data was deleted successfully</font>
+<font color ="#0000FF">*004   Data save failed</font>
+<font color ="#0000FF">*005   Data deletion failed</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

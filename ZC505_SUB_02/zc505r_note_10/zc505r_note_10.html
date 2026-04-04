@@ -1,0 +1,223 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_10</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_10</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Program ZC505R_NOTE_10</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_10</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_10 MESSAGE-ID zc505m.
+
+
+<font color ="#0000FF">****12월 1일******************************************************************</font>
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-t01.
+
+  PARAMETERS : pa_carr TYPE sflight-carrid OBLIGATORY, "필수 입ㄹ력
+               pa_conn TYPE sflight-connid OBLIGATORY.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+<font color ="#0000FF">**********************************************************************</font>
+DATA : ls_flight TYPE sflight,
+       lt_flight LIKE TABLE OF ls_flight.
+
+CLEAR   : ls_flight.
+REFRESH : lt_flight.
+<font color ="#0000FF">**********************************************************************</font>
+
+SELECT carrid connid fldate price currency
+  INTO CORRESPONDING FIELDS OF TABLE lt_flight
+  FROM sflight.
+<font color ="#0000FF">* WHERE carrid = pa_carr</font>
+<font color ="#0000FF">*   AND connid = pa_conn.</font>
+
+
+IF sy-subrc NE 0.
+  MESSAGE s001.
+  STOP.
+ENDIF.
+
+cl_demo_output=&gt;display( lt_flight ).
+
+<font color ="#0000FF">*실습1*********************************************************************</font>
+  SELECTION-SCREEN BEGIN OF BLOCK bl2 WITH FRAME.
+
+    PARAMETERS : pa_werks TYPE marc-werks OBLIGATORY.
+
+  SELECTION-SCREEN END OF BLOCK bl2.
+
+DATA : BEGIN OF ls_marc,
+         matnr TYPE marc-matnr,
+         werks TYPE marc-werks,
+         pstat TYPE marc-pstat,
+         ekgrp TYPE marc-ekgrp,
+         dismm TYPE marc-dismm,
+         dispo TYPE marc-dispo,
+         beskz TYPE marc-beskz,
+       END OF ls_marc,
+
+       lt_marc LIKE TABLE OF ls_marc.
+
+CLEAR   : ls_marc.
+REFRESH : lt_marc.
+
+SELECT matnr werks pstat ekgrp
+       dismm dispo beskz
+  INTO CORRESPONDING FIELDS OF TABLE lt_marc
+  FROM marc
+ WHERE werks = pa_werks.
+
+IF sy-subrc NE 0.
+  MESSAGE s001.
+  STOP.
+ENDIF.
+
+cl_demo_output=&gt;display( lt_marc ).
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*****12월 1일******************************************************************</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** [1] 선택화면 구성 - BLOCK bl1</font>
+<font color ="#0000FF">**     항공사 + 노선 번호를 필수 입력으로 받는 기능</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-t01.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  PARAMETERS : pa_carr TYPE sflight-carrid OBLIGATORY, "항공사 필수 입력</font>
+<font color ="#0000FF">*               pa_conn TYPE sflight-connid OBLIGATORY. "노선 번호 필수</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK bl1.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** PARAMETERS 작동원리:</font>
+<font color ="#0000FF">**  - 단일값만 입력 가능</font>
+<font color ="#0000FF">**  - OBLIGATORY(필수값) → 공백이면 실행 안 됨</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">***********************************************************************</font>
+<font color ="#0000FF">** [2] 구조체 + 내부테이블 선언 및 초기화</font>
+<font color ="#0000FF">***********************************************************************</font>
+<font color ="#0000FF">*DATA : ls_flight TYPE sflight,               "WA 구조체</font>
+<font color ="#0000FF">*       lt_flight LIKE TABLE OF ls_flight.    "Internal Table</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*CLEAR   : ls_flight.                         "WA 값 초기화</font>
+<font color ="#0000FF">*REFRESH : lt_flight.                         "ITAB 전체 삭제</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">***********************************************************************</font>
+<font color ="#0000FF">** [3] SELECT 실행</font>
+<font color ="#0000FF">***********************************************************************</font>
+<font color ="#0000FF">*SELECT carrid connid fldate price currency</font>
+<font color ="#0000FF">*  INTO CORRESPONDING FIELDS OF TABLE lt_flight</font>
+<font color ="#0000FF">*  FROM sflight.</font>
+<font color ="#0000FF">** WHERE carrid = pa_carr</font>
+<font color ="#0000FF">**   AND connid = pa_conn.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">** 위 WHERE 절을 주석처리한 상태 → 전체 데이터 조회됨</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** SELECT 작동 원리:</font>
+<font color ="#0000FF">**   INTO CORRESPONDING FIELDS OF TABLE lt_flight</font>
+<font color ="#0000FF">**   → 필드명 자동 매핑 (순서 상관 없음)</font>
+<font color ="#0000FF">**   → 여러 줄을 직접 lt_flight 에 넣는다.</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** [4] 조회된 데이터 체크</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*IF sy-subrc NE 0.</font>
+<font color ="#0000FF">*  MESSAGE s001.       "메시지 클래스 zc505m 의 001번</font>
+<font color ="#0000FF">*  STOP.               "데이터 없으면 프로그램 종료</font>
+<font color ="#0000FF">*ENDIF.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** [5] Internal Table 출력</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*cl_demo_output=&gt;display( lt_flight ).</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**실습1*********************************************************************</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** [6] 선택화면 - PLANT(werks) 필수 입력</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK bl2 WITH FRAME.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  PARAMETERS : pa_werks TYPE marc-werks OBLIGATORY.  "공장코드 필수</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK bl2.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** [7] MARC 구조체 + 내부테이블 선언</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*DATA : BEGIN OF ls_marc,</font>
+<font color ="#0000FF">*         matnr TYPE marc-matnr,      "자재번호</font>
+<font color ="#0000FF">*         werks TYPE marc-werks,      "공장</font>
+<font color ="#0000FF">*         pstat TYPE marc-pstat,      "플랜트 상태</font>
+<font color ="#0000FF">*         ekgrp TYPE marc-ekgrp,      "구매 그룹</font>
+<font color ="#0000FF">*         dismm TYPE marc-dismm,      "MRP 종류</font>
+<font color ="#0000FF">*         dispo TYPE marc-dispo,      "MRP 관리자</font>
+<font color ="#0000FF">*         beskz TYPE marc-beskz,      "조달 유형</font>
+<font color ="#0000FF">*       END OF ls_marc,</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*       lt_marc LIKE TABLE OF ls_marc.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*CLEAR   : ls_marc.</font>
+<font color ="#0000FF">*REFRESH : lt_marc.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** [8] MARC 데이터 조회</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*SELECT matnr werks pstat ekgrp</font>
+<font color ="#0000FF">*       dismm dispo beskz</font>
+<font color ="#0000FF">*  INTO CORRESPONDING FIELDS OF TABLE lt_marc</font>
+<font color ="#0000FF">*  FROM marc</font>
+<font color ="#0000FF">* WHERE werks = pa_werks.         "PARAMETERS 조건 적용</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** PARAMETERS 작동원리:</font>
+<font color ="#0000FF">**   WHERE werks = pa_werks</font>
+<font color ="#0000FF">**   → 사용자가 입력한 공장에 해당하는 MARC 레코드만 SELECT 됨</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** [9] 조회 결과 체크</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*IF sy-subrc NE 0.</font>
+<font color ="#0000FF">*  MESSAGE s001.    "데이터 없음</font>
+<font color ="#0000FF">*  STOP.</font>
+<font color ="#0000FF">*ENDIF.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">** [10] Internal Table 출력</font>
+<font color ="#0000FF">**---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*cl_demo_output=&gt;display( lt_marc ).</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">***********************************************************************</font>
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T01 Selection Condition</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_CARR D       .</font>
+<font color ="#0000FF">* PA_CONN D       .</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

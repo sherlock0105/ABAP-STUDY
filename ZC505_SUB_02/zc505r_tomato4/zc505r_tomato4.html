@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_TOMATO4</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_TOMATO4</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Program ZC505R_TOMATO4</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_TOMATO4</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_tomato4 MESSAGE-ID zc505m.
+
+TABLES : zc505t0029.
+
+DATA :BEGIN OF gs_group,
+        group_id        TYPE zc505t0029-group_id,
+        group_txt       TYPE zc505t0029-group_txt,
+        member_id       TYPE zc505t0040-member_id,
+        member_name     TYPE zc505t0040-member_name,
+        member_gender   TYPE zc505t0040-member_gender,
+        member_addr     TYPE zc505t0040-member_addr,
+        member_phone    TYPE zc505t0040-member_phone,
+        group_url       TYPE zc505t0029-group_url,
+        gender_text(10),
+      END OF gs_group,
+
+      gt_group LIKE TABLE OF gs_group,
+      lv_tabix TYPE sy-tabix.
+
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-001.
+
+  SELECT-OPTIONS : so_grp FOR zc505t0029-group_id NO-EXTENSION NO INTERVALS.
+
+  PARAMETERS : pa_mem TYPE zc505t0040-member_id.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+
+SELECT a~group_id a~group_txt a~group_url
+       b~member_id b~member_name b~member_gender b~member_addr b~member_phone
+  INTO CORRESPONDING FIELDS OF TABLE gt_group
+  FROM zc505t0029 AS a
+ INNER JOIN zc505t0040 AS b
+    ON a~group_id  EQ b~group_id
+ WHERE a~group_id  IN so_grp "빈값으로 넣게되면 WHERE 조건에서 사라짐
+   AND b~member_id = pa_mem
+  ORDER BY b~member_id.
+
+"index 를 활용해서 테이블을 읽는다.
+LOOP AT gt_group INTO gs_group.
+"gs_group 데이터를 읽고 변환시켜줌.
+  lv_tabix = sy-tabix.
+
+  IF gs_group-member_gender = 'M'.
+    gs_group-gender_text   = '남자'.
+"modify 업데이트, loop 안에서만 바뀐 값을 밖으로 내보내준다.
+    MODIFY gt_group FROM gs_group INDEX lv_tabix
+    TRANSPORTING gender_text.
+
+  ELSEIF gs_group-member_gender = 'F'.
+    gs_group-gender_text   = '여자'.
+
+    MODIFY gt_group FROM gs_group INDEX lv_tabix
+    TRANSPORTING gender_text.
+
+  ENDIF.
+
+ENDLOOP.
+
+IF  sy-subrc NE 0.
+  "데이터가 없는데도 조회되는게 싫음. 아래 로직을 타지 않게 STOP 을 적어준다.
+  "내가 조회하는 데이터가 없을때!.
+  MESSAGE s000 WITH '값을 입력하세요' DISPLAY LIKE 'E'.
+  STOP.
+ENDIF.
+
+
+cl_demo_output=&gt;display( gt_group ).
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_MEM D       .</font>
+<font color ="#0000FF">* SO_GRP D       .</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*000   & & & &</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

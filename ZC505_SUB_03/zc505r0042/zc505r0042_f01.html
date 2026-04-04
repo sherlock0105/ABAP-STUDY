@@ -1,0 +1,272 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0042_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0042_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0042_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZC505R0042_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_init</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_init .
+
+  pa_bukrs = '0001'.
+  pa_gjahr = '2010'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  CLEAR   : gs_data.
+  REFRESH : gt_data.
+
+  SELECT a~blart a~budat "BKPF
+         b~belnr b~buzei b~bschl b~koart b~gsber "BSEG
+         b~shkzg b~hkont b~dmbtr b~pswsl
+    INTO CORRESPONDING FIELDS OF TABLE gt_data
+    FROM bkpf AS a
+   INNER JOIN bseg AS b
+      ON a~bukrs EQ b~bukrs
+     AND a~belnr EQ b~belnr
+     AND a~belnr EQ b~belnr
+   WHERE a~bukrs EQ pa_bukrs
+     AND a~gjahr EQ pa_gjahr.
+
+  IF sy-subrc NE 0.
+    MESSAGE s001.
+    LEAVE LIST-PROCESSING.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout-zebra      = 'X'.
+  gs_layout-cwidth_opt = 'A'.
+  gs_layout-sel_mode   = 'D'.
+  gs_layout-grid_title = 'Company info'.
+  gs_layout-smalltitle = 'X'.
+
+  gs_stable-row = 'X'.
+  gs_stable-col = 'X'.
+
+  PERFORM make_fcat USING :
+    'X' 'BELNR' ' ' 'BSEG' ' ',
+    'X' 'BUZEI' ' ' 'BSEG' ' ',
+    ' ' 'BLART' ' ' 'BKPF' ' ',
+    ' ' 'BUDAT' ' ' 'BKPF' ' ',
+    ' ' 'BSCHL' ' ' 'BSEG' ' ',
+    ' ' 'KOART' ' ' 'BSEG' ' ',
+    ' ' 'GSBER' ' ' 'BSEG' ' ',
+    ' ' 'SHKZG' ' ' 'BSEG' ' ',
+    ' ' 'HKONT' ' ' 'BSEG' ' ',
+    ' ' 'DMBTR' ' ' 'BSEG' ' ',
+    ' ' 'PSWSL' ' ' 'BSEG' ' '.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat  USING  pv_key
+                       pv_field
+                       pv_text
+                       pv_ref_table
+                       pv_ref_field.
+
+  gs_fcat-key       = pv_key.
+  gs_fcat-fieldname = pv_field.
+  gs_fcat-coltext   = pv_text.
+  gs_fcat-ref_table = pv_ref_table.
+  gs_fcat-ref_field = pv_ref_field.
+
+  CASE pv_field.
+    WHEN 'BELNR'.
+      gs_fcat-hotspot = 'X'.
+    WHEN 'DMBTR'.
+      gs_fcat-cfieldname = 'PSWSL'.
+  ENDCASE.
+
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR  gs_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      side      = gcl_container-&gt;dock_at_left
+      extension = 5000.
+
+  CREATE OBJECT gcl_grid
+    EXPORTING
+      i_parent = gcl_container.
+
+  gs_variant-report = sy-repid.
+
+  IF gcl_handler IS NOT BOUND.
+    CREATE OBJECT gcl_handler.
+  ENDIF.
+
+  SET HANDLER : gcl_handler-&gt;handle_hotspot_click FOR gcl_grid,
+                gcl_handler-&gt;handle_double_click  FOR gcl_grid.
+
+  CALL METHOD gcl_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant
+      i_save          = 'A'
+      i_default       = 'X'
+      is_layout       = gs_layout
+    CHANGING
+      it_outtab       = gt_data
+      it_fieldcatalog = gt_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_grid .
+
+  CALL METHOD gcl_grid-&gt;refresh_table_display
+    EXPORTING
+      is_stable      = gs_stable
+      i_soft_refresh = space.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_hotspot_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW_ID</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN_ID</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_hotspot_click  USING  ps_row TYPE lvc_s_row
+                                  ps_col TYPE lvc_s_col.
+
+  IF ps_row-rowtype IS NOT INITIAL. "소계/합계 행 더블클릭 방지
+    EXIT.
+  ENDIF.
+
+  READ TABLE gt_data INTO gs_data INDEX ps_row-index. ""실제 클릭된 행 데이터 가져오기
+
+  IF sy-subrc NE 0.
+    EXIT.
+  ENDIF.
+
+  CASE ps_col-fieldname. "'BELNR' 컬럼을 클릭했을때만 동작
+    WHEN 'BELNR'.
+      PERFORM move_fb03 USING gs_data-belnr.
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_double_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_double_click  USING    ps_row TYPE lvc_s_row
+                                   ps_col TYPE lvc_s_col.
+
+  IF ps_row-rowtype IS NOT INITIAL.
+    EXIT.
+  ENDIF.
+
+  READ TABLE gt_data INTO gs_data INDEX ps_row-index.
+
+
+  CASE ps_col-fieldname.
+    WHEN 'HKONT'.
+      PERFORM move_faglb03 USING gs_data-hkont.
+  ENDCASE.
+
+  CLEAR gs_data.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form move_faglb03</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; GS_DATA_HKONT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM move_faglb03  USING  pv_hkont.
+
+  SET PARAMETER ID : 'ACC' FIELD gs_data-hkont,
+                     'BUK' FIELD pa_bukrs,
+                     'GJR' FIELD pa_gjahr.
+
+  CALL TRANSACTION 'FAGLB03' AND SKIP FIRST SCREEN.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form move_fb03</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; GS_DATA_BELNR</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM move_fb03  USING    p_gs_data_belnr.
+
+  SET PARAMETER ID : 'BLN' FIELD gs_data-belnr,
+                     'BUK' FIELD pa_bukrs,
+                     'GJR' FIELD pa_gjahr.
+
+  CALL TRANSACTION 'FB03' AND SKIP FIRST SCREEN.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

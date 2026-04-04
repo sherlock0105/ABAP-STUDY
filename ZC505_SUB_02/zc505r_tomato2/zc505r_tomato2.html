@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_TOMATO2</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_TOMATO2</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Program ZC505R_TOMATO2</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_TOMATO2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_tomato2.
+
+<font color ="#0000FF">*구구단 출력</font>
+
+DATA: lv_dan     TYPE i, "모두 숫자니까 int 로 데이터 타입 지정
+      lv_num     TYPE i,
+      lv_result  TYPE i,
+      lv_dan2    TYPE i,
+      lv_num2    TYPE i,
+      lv_result2 TYPE i.
+
+DO 9 TIMES.              " 9번 반복
+  lv_dan = lv_dan + 1.   " lv_dan = 1 → 2 → 3 … (직접 증가)
+
+  lv_num = 1.            " 매 단마다 곱하는 수를 1로 초기화
+
+  DO 9 TIMES.
+    lv_result = lv_dan * lv_num.
+    lv_num = lv_num + 1. " 1 → 2 → 3 … 9.
+
+    WRITE : lv_dan, 'X', sy-index,'=' , lv_result.
+<font color ="#0000FF">*    WRITE : lv_result.</font>
+
+  ENDDO.
+  WRITE : /.
+ENDDO.
+
+
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-001.
+
+  PARAMETERS : pa_dan TYPE i OBLIGATORY.
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+
+DO pa_dan TIMES.              " pa_dan 만큼 반복 내가 입력한 값
+  lv_dan2 = lv_dan2 + 1.   " lv_dan = 1 → 2 → 3 … (직접 증가)
+  lv_num2 = 1.            " 매 단마다 곱하는 수를 1로 초기화
+
+  DO 9 TIMES.
+    lv_result2 = lv_dan2 * lv_num2. "result2 결과값 저장
+
+    lv_num2 = lv_num2 + 1. " 1 → 2 → 3 … 9.
+
+    WRITE : lv_dan2, 'X', sy-index,'=' , lv_result2, /.
+  ENDDO.
+
+  WRITE : /.
+
+ENDDO.
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* 001 구구단</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

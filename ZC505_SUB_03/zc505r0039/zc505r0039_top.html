@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0039_TOP</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0039_TOP</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0039_TOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include ZC505R0039_TOP                           - Report ZC505R0039</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r0039 MESSAGE-ID zc505m.
+
+TABLES : spfli.
+
+CLASS lcl_event_handler DEFINITION DEFERRED.
+
+DATA : gs_spfli  TYPE spfli,
+       gt_spfli  LIKE TABLE OF gs_spfli,
+       gs_scarr  TYPE scarr,
+       gt_scarr  LIKE TABLE OF gs_scarr, "popup itab
+
+       gv_okcode TYPE sy-ucomm.
+<font color ="#0000FF">**********************************************************************</font>
+<font color ="#0000FF">*ALV 관련</font>
+DATA : gcl_container TYPE REF TO cl_gui_docking_container,
+       gcl_grid      TYPE REF TO cl_gui_alv_grid,
+       gcl_handler   TYPE REF TO lcl_event_handler,
+       gs_fcat       TYPE lvc_s_fcat,
+       gt_fcat       TYPE lvc_t_fcat,
+       gs_layout     TYPE lvc_s_layo,
+       gs_variant    TYPE disvariant,
+       gs_stable     TYPE lvc_s_stbl.
+<font color ="#0000FF">**********************************************************************</font>
+<font color ="#0000FF">*Popup 관련</font>
+DATA : gcl_container_pop TYPE REF TO cl_gui_custom_container,
+       gcl_grid_pop      TYPE REF TO cl_gui_alv_grid,
+       gt_fcat_pop       TYPE lvc_t_fcat.
+<font color ="#0000FF">**********************************************************************</font>
+<font color ="#0000FF">*macro 관련</font>
+DEFINE _clear. "Macro
+
+  CLEAR   &1.
+  REFRESH &2.
+<font color ="#0000FF">*_clear gs_spfli gt_spfli</font>
+END-OF-DEFINITION.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

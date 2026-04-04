@@ -1,0 +1,360 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R0071_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R0071_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC505R0071_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZC505R0071_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_param</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_param .
+
+  pa_werks = '0001'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  REFRESH gt_data.
+
+  CALL METHOD zc505cl_amdp_03=&gt;get_mara
+    EXPORTING
+      iv_werks = pa_werks
+    IMPORTING
+      et_mara  = gt_data.
+
+  IF gt_data IS INITIAL.
+    MESSAGE s001.
+    LEAVE LIST-PROCESSING.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout .
+
+  gs_layout = VALUE #(
+              zebra      = 'X'
+              cwidth_opt = 'A'
+              sel_mode   = 'D'
+              grid_title = TEXT-t02
+              smalltitle = 'X'
+                   ).
+
+  gs_stable = VALUE #(
+                row = 'X'
+                col = 'X'
+                     ).
+
+  PERFORM make_fcat USING :
+    'X' 'MATNR'  ' ' 'MARA'  ' ' ,
+    'X' 'WERKS'  ' ' 'MARC'  ' ' ,
+    ' ' 'MAKTX'  ' ' 'MAKT'  ' ' ,
+    ' ' 'VPSTA'  ' ' 'MARA'  ' ' ,
+    ' ' 'MBRSH'  ' ' 'MARA'  ' ' ,
+    ' ' 'MBBEZ'  ' ' 'T137T' ' ' ,
+    ' ' 'MEINS'  ' ' 'MARA'  ' ' ,
+    ' ' 'EKGRP'  ' ' 'MARC'  ' ' ,
+    ' ' 'DISMM'  ' ' 'MARC'  ' ' ,
+    ' ' 'BESKZ'  ' ' 'MARC'  ' '.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_fcat  USING     pv_key
+                          pv_field
+                          pv_text
+                          pv_ref_table
+                          pv_ref_field.
+
+
+  gs_fcat = VALUE #(
+            key       = pv_key
+            fieldname = pv_field
+            coltext   = pv_text
+            ref_table = pv_ref_table
+            ref_field = pv_ref_field
+                   ).
+
+  CASE pv_field.
+
+    WHEN 'WERKS'.
+      gs_fcat-hotspot = 'X'.
+
+  ENDCASE.
+
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR  gs_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_screen .
+
+  CREATE OBJECT gcl_container
+    EXPORTING
+      side      = gcl_container-&gt;dock_at_left " Side to Which Control is Docked
+      extension = 5000.                       " Control Extension
+
+  CREATE OBJECT gcl_grid
+    EXPORTING
+      i_parent = gcl_container.
+
+  gs_variant-report = sy-repid.
+
+  SET HANDLER : lcl_event_handler=&gt;handle_hotspot       FOR gcl_grid,
+                lcl_event_handler=&gt;handle_double_click  FOR gcl_grid.
+
+  CALL METHOD gcl_grid-&gt;register_edit_event
+    EXPORTING
+      i_event_id = gcl_grid-&gt;mc_evt_modified.                 " Event ID
+
+  CALL METHOD gcl_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant       " Layout
+      i_save          = 'A'              " Save Layout
+      i_default       = 'X'              " Default Display Variant
+      is_layout       = gs_layout        " Layout
+    CHANGING
+      it_outtab       = gt_data           " Output Table
+      it_fieldcatalog = gt_fcat.         " Field Catalog
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_hotspot</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW_ID</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN_ID</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_hotspot  USING  ps_row TYPE lvc_s_row
+                            ps_col TYPE lvc_s_col.
+
+  REFRESH : gt_marc.
+
+  CHECK ps_row-rowtype IS INITIAL.
+
+<font color ="#0000FF">*  READ TABLE gt_data INTO DATA(gs_data) INDEX ps_row-index.</font>
+
+  DATA(ls_data) = VALUE #( gt_data[ ps_row-index ] OPTIONAL ).
+
+  CHECK ls_data IS NOT INITIAL.
+
+  CHECK ps_col-fieldname EQ 'WERKS'.
+
+  PERFORM get_marc_data USING ls_data-matnr
+                              ls_data-werks.
+
+  IF gt_marc IS INITIAL.
+    MESSAGE s000 WITH 'Data not found'.
+    EXIT.
+  ENDIF.
+
+  CALL SCREEN '0101' STARTING AT 20 3.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_double_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_double_click  USING  ps_row TYPE lvc_s_row
+                                 ps_col TYPE lvc_s_col.
+
+  CHECK ps_row-rowtype IS INITIAL.
+
+<font color ="#0000FF">*  DATA(ls_data) = VALUE #( gt_data[ ps_row-index ] OPTIONAL ).</font>
+
+  DATA(ls_data) = gt_data[ ps_row-index ].
+
+  CHECK ls_data IS NOT INITIAL.
+
+  CHECK ps_col-fieldname EQ 'MATNR'.
+
+  PERFORM get_mara_data USING ls_data-matnr.
+
+  IF gt_mara IS INITIAL.
+    MESSAGE s000 WITH 'Data not found'.
+    EXIT.
+  ENDIF.
+
+  CALL SCREEN '0102' STARTING AT 20 3.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_marc_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; LS_DATA_MATNR</font>
+<font color ="#0000FF">*&      --&gt; LS_DATA_WERKS</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_marc_data  USING    pv_matnr TYPE marc-matnr
+                             pv_werks TYPE marc-werks.
+
+  SELECT *
+    FROM zc505cds0018
+    INTO TABLE @gt_marc
+   WHERE matnr EQ @pv_matnr
+     AND werks EQ @pv_werks.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout_pop</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout_pop .
+
+  gs_layout = VALUE #( BASE gs_layout
+        no_toolbar = 'X'
+             ).
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'ZC505CDSV0018'
+    CHANGING
+      ct_fieldcat      = gt_fcat_pop.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_mara_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; LS_DATA_MATNR</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_mara_data  USING  pv_matnr TYPE mara-matnr.
+
+  REFRESH: gt_mara.
+
+  DATA : lcl_connection TYPE REF TO cl_sql_connection, "DB 연결
+         lcl_statement  TYPE REF TO cl_sql_statement, "SQL 실행
+         lcl_result     TYPE REF TO cl_sql_result_set, "결과 받기
+         lr_data        TYPE REF TO data,
+         lv_sql         TYPE string,
+         lx_sql_except  TYPE REF TO cx_root,
+         lv_msg         TYPE string.
+
+  TRY.
+      lcl_connection = cl_sql_connection=&gt;get_connection( ). " DB CONNECTION 정보 얻기
+
+      CREATE OBJECT lcl_statement
+        EXPORTING
+          con_ref = lcl_connection.                          " Database Connection
+
+      lv_sql =   | SELECT A.MATNR, B.MAKTX, A.MTART, C.MTBEZ, A.MATKL, D.MBBEZ | &&
+                 |   FROM MARA AS A                                            | &&
+                 |   LEFT OUTER JOIN MAKT AS B                                 | &&
+                 |     ON A.MATNR = B.MATNR                                    | &&
+                 |    AND B.SPRAS = '{ sy-langu }'                             | &&
+                 |    AND B.MANDT = '{ sy-mandt }'                             | &&
+                 |   LEFT OUTER JOIN T134T AS C                                | &&
+                 |     ON A.MTART = C.MTART                                    | &&
+                 |    AND C.SPRAS = '{ sy-langu }'                             | &&
+                 |    AND C.MANDT = '{ sy-mandt }'                             | &&
+                 |   LEFT OUTER JOIN T137T AS D                                | &&
+                 |     ON A.MBRSH = D.MBRSH                                    | &&
+                 |    AND D.SPRAS = '{ sy-langu }'                             | &&
+                 |    AND D.MANDT = '{ sy-mandt }'                             | &&
+                 |  WHERE A.MANDT  = '{ sy-mandt  }'                           | &&
+                 |    AND A.MATNR  = '{ pv_matnr }'                            |.
+
+      lcl_result = lcl_statement-&gt;execute_query( lv_sql ).
+
+      GET REFERENCE OF gt_mara INTO lr_data.
+
+      lcl_result-&gt;set_param_table( lr_data ).
+
+
+      lcl_result-&gt;next_package( ).
+
+      lcl_result-&gt;close( ).
+
+    CATCH cx_sql_exception INTO lx_sql_except.
+
+      lv_msg = lx_sql_except-&gt;get_text( ).
+      lcl_result-&gt;close( ).
+
+      MESSAGE s000 WITH lv_msg DISPLAY LIKE 'E'.
+      EXIT.
+
+  ENDTRY.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_fcat_layout_pop2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fcat_layout_pop2 .
+
+  gs_layout = VALUE #( BASE gs_layout
+      no_toolbar = 'X'
+           ).
+
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING
+      i_structure_name = 'ZC505CDSV0019'
+    CHANGING
+      ct_fieldcat      = gt_fcat_pop2.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>

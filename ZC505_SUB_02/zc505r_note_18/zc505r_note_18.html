@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC505R_NOTE_18</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC505R_NOTE_18</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  과제</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZC505R_NOTE_18</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zc505r_note_18 MESSAGE-ID zc505m.
+
+
+DATA : BEGIN OF ls_bkpf,
+         bukrs          TYPE bkpf-bukrs,
+         belnr          TYPE bkpf-belnr,
+         buzei          TYPE bseg-buzei,
+         gjahr          TYPE bkpf-gjahr,
+         blart          TYPE bkpf-blart,
+         ltext          TYPE t003t-ltext, "텍스트 테이블
+         budat          TYPE bkpf-budat,
+         bldat          TYPE bkpf-bldat,
+         bschl          TYPE bseg-bschl,
+         koart          TYPE bseg-koart,
+         koart_text(50),
+         shkzg          TYPE bseg-shkzg,
+         shkzg_text(20),
+         dmbtr          TYPE bseg-dmbtr,
+       END OF ls_bkpf,
+
+       lt_bkpf  LIKE TABLE OF ls_bkpf,
+       lv_tabix TYPE sy-tabix.
+
+<font color ="#0000FF">*테이블, 변수 클리어</font>
+CLEAR   : ls_bkpf, lv_tabix.
+REFRESH : lt_bkpf.
+
+SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE TEXT-t01.
+
+  PARAMETERS : pa_gjahr TYPE bkpf-gjahr OBLIGATORY DEFAULT '2010'."필수 입력, 기본값 '2010' 으로 설정
+
+SELECTION-SCREEN END OF BLOCK bl1.
+
+<font color ="#0000FF">*INITIALIZATION. "초기값 설정</font>
+<font color ="#0000FF">*  pa_gjahr = '2010'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*START-OF-SELECTION.</font>
+
+  SELECT a~bukrs a~belnr a~gjahr a~blart a~budat a~bldat "bkpf 테이블
+         b~buzei b~bschl b~koart b~shkzg b~dmbtr
+    INTO CORRESPONDING FIELDS OF TABLE lt_bkpf
+    FROM bkpf AS a
+   INNER JOIN bseg AS b "HEADER 을 LEFT로 조인 실행
+      ON a~bukrs EQ b~bukrs
+     AND a~belnr EQ b~belnr
+     AND a~gjahr EQ b~gjahr
+    LEFT OUTER JOIN t003t AS c
+      ON a~blart EQ c~blart
+   WHERE a~gjahr EQ pa_gjahr.
+
+  IF sy-subrc NE 0.
+    MESSAGE s001 DISPLAY LIKE 'E'.
+    STOP.
+  ENDIF.
+
+  LOOP AT lt_bkpf INTO ls_bkpf.
+
+    lv_tabix = sy-tabix.
+
+    CASE ls_bkpf-koart.
+      WHEN 'A'.
+        ls_bkpf-koart_text = 'Asset'.
+      WHEN 'D'.
+        ls_bkpf-koart_text = 'Customers'.
+      WHEN 'K'.
+        ls_bkpf-koart_text = 'Suppliers'.
+      WHEN 'M'.
+        ls_bkpf-koart_text = 'Material'.
+      WHEN 'S'.
+        ls_bkpf-koart_text = 'G/L Account'.
+    ENDCASE.
+    "shkzg 가 H, S 일때 아래의 값으로 변경
+    CASE ls_bkpf-shkzg.
+      WHEN 'H'.
+        ls_bkpf-shkzg_text = 'Credit'.
+      WHEN 'S'.
+        ls_bkpf-shkzg_text = 'Debit'.
+    ENDCASE.
+
+    MODIFY lt_bkpf FROM ls_bkpf INDEX lv_tabix
+    TRANSPORTING koart_text shkzg_text.
+
+  ENDLOOP.
+
+  cl_demo_output=&gt;display( lt_bkpf ).
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T01 Selection Condition</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_GJAHR D       .</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZC505M</font>
+<font color ="#0000FF">*001   Data not found</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>
