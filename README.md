@@ -1,4 +1,4 @@
-# ZC505 ABAP 교육 프로그램 모음
+# ABAP Study · ZC505 교육 실습
 
 > SAP ABAP 교육과정 실습 코드 전체 모음입니다.  
 > ALV 기초부터 CDS View / AMDP / ADBC까지 단계별로 구성되어 있습니다.
@@ -8,7 +8,7 @@
 ## 폴더 구조 한눈에 보기
 
 ```
-zc50501/
+./
 ├── ZC505_SUB_01/   ALV 기초 (구석기 → 철기 → 기본형 → Color/Icon/Sort)
 ├── ZC505_SUB_02/   강의 노트 및 이전 기록 (SQL, 내부테이블, 구조체)
 ├── ZC505_SUB_03/   Function Group / FM 호출 / ALV Event + Popup
